@@ -1,12 +1,22 @@
 {
-   // Check if SupernovaModel is already loaded
-   if (!TClass::GetDict("SupernovaModel")) {
+   // check if class SupernovaModel is already loaded
+   if (!TClass::GetDict("SupernovaModel"))
       gROOT->ProcessLine(".L SupernovaModel.cc++");
-   }
 
-   // Use the Class
-   SupernovaModel *data = new SupernovaModel;
-   data->NumberSpectrum("#nu_{e}")->Draw("apl");
-   data->NumberSpectrum("#bar{#nu}_{e}")->Draw("pl");
-   data->NumberSpectrum("#nu_{x}")->Draw("pl");
+   // initialize the model
+   Double_t initialMass, metallicity, reviveTime;
+   SupernovaModel *model = new SupernovaModel(
+         initialMass=13,/*Solar mass*/
+         metallicity=0.02,
+         reviveTime=100/*ms*/);
+   model->LoadIntegratedData("./integdata");
+
+   // draw spectra
+   model->IntegratedNumberSpectrum("#nu_{e}")->Draw();
+   model->IntegratedNumberSpectrum("#bar{#nu}_{e}")->Draw("same");
+   model->IntegratedNumberSpectrum("#nu_{x}")->Draw("same");
+
+   model->IntegratedEnergySpectrum("#nu_{e}")->Draw();
+   model->IntegratedEnergySpectrum("#bar{#nu}_{e}")->Draw("same");
+   model->IntegratedEnergySpectrum("#nu_{x}")->Draw("same");
 }
