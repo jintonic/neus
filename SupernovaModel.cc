@@ -1,6 +1,6 @@
 #include <TGraph.h>
 
-class TimeIntegrated : public TObject
+class SupernovaModel : public TObject
 {
    protected:
       TGraph *fGN1, *fGN2, *fGN3, *fGE1, *fGE2, *fGE3;
@@ -10,12 +10,12 @@ class TimeIntegrated : public TObject
       Float_t fReviveTime; ///< shock revival time in ms
 
    public:
-      TimeIntegrated(
+      SupernovaModel(
             Float_t initialMass=13, /* Solar mass */
             Float_t metallicity=0.02,
             Float_t reviveTime=100, /* ms */
             const char *databaseDir="./integdata");
-      virtual ~TimeIntegrated();
+      virtual ~SupernovaModel();
 
       void LoadData(
             Float_t initialMass=13, /* Solar mass */
@@ -25,13 +25,13 @@ class TimeIntegrated : public TObject
 
       TGraph* NumberSpectrum(const char *neutrino="#bar{#nu}_{e}");
 
-      ClassDef(TimeIntegrated,0);
+      ClassDef(SupernovaModel,0);
 };
 
 //______________________________________________________________________________
 //
 
-TimeIntegrated::TimeIntegrated(
+SupernovaModel::SupernovaModel(
       Float_t initialMass, Float_t metallicity, Float_t reviveTime,
       const char *databaseDir) : TObject(), 
    fGN1(0), fGN2(0), fGN3(0), fGE1(0), fGE2(0), fGE3(0),
@@ -43,7 +43,7 @@ TimeIntegrated::TimeIntegrated(
 //______________________________________________________________________________
 //
 
-TimeIntegrated::~TimeIntegrated()
+SupernovaModel::~SupernovaModel()
 {
    if (fGN1) delete fGN1;
    if (fGN2) delete fGN2;
@@ -60,7 +60,7 @@ TimeIntegrated::~TimeIntegrated()
 #include <string>
 using namespace std;
 
-void TimeIntegrated::LoadData(
+void SupernovaModel::LoadData(
       Float_t initialMass, Float_t metallicity, Float_t reviveTime,
       const char *databaseDir)
 {
@@ -142,7 +142,7 @@ void TimeIntegrated::LoadData(
 //______________________________________________________________________________
 //
 
-TGraph* TimeIntegrated::NumberSpectrum(const char *neutrino)
+TGraph* SupernovaModel::NumberSpectrum(const char *neutrino)
 {
    TString species(neutrino);
    if (species=="#nu_{e}") {
