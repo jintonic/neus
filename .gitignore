@@ -1,0 +1,15 @@
+*.[ado]
+*.d.*
+
+*.so
+*Dict*
+*.rootmap
+
+*.ps
+*.gz
+*.pdf
+*.root
+
+integdata
+intpdata
+sndata
