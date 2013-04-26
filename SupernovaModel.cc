@@ -57,7 +57,9 @@ void SupernovaModel::LoadIntegratedData(const char *databaseDir)
    ifstream file(name);
    if (!(file.is_open())) {
       Warning("LoadIntegratedData", "%s cannot be read!", name);
-      fH1Empty = new TH1D("h1Empty","Empty spectrum",0,0.,0.);
+      fH1Empty = new TH1D(Form("h1Empty%.0f%.0f%.0f",
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            "Empty spectrum",0,0.,0.);
       return;
    }
 
@@ -89,23 +91,23 @@ void SupernovaModel::LoadIntegratedData(const char *databaseDir)
 
    // fill spectra
    fH1N1 = new TH1D(Form("h1N1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
    fH1N2 = new TH1D(Form("h1N2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
    fH1N3 = new TH1D(Form("h1N3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
 
    fH1E1 = new TH1D(Form("h1E1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
    fH1E2 = new TH1D(Form("h1E2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
    fH1E3 = new TH1D(Form("h1E3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
 
    for (i=1; i<=nbins; i++) {
@@ -119,18 +121,18 @@ void SupernovaModel::LoadIntegratedData(const char *databaseDir)
    }
 
    // set properties
-   fH1N1->SetTitle(Form("#nu_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1N1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1N3->SetTitle(Form("#nu_{x}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1N3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
-   fH1E1->SetTitle(Form("#nu_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1E1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1E3->SetTitle(Form("#nu_{x}, model: %.0f #odot, %.3f, %.0f ms",
+   fH1E3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
    fH1N1->SetStats(0);
@@ -233,7 +235,9 @@ void SupernovaModel::LoadFullData(const char *databaseDir)
    ifstream file(name);
    if (!(file.is_open())) {
       Warning("LoadFullData", "%s cannot be read!", name);
-      fH2Empty = new TH2D("h2Empty","Empty spectrum",0,0.,0.,0,0.,0.);
+      fH2Empty = new TH2D(Form("h2Empty%.0f%.0f%.0f",
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            "Empty spectrum",0,0.,0.,0,0.,0.);
       return;
    }
 
@@ -278,28 +282,28 @@ void SupernovaModel::LoadFullData(const char *databaseDir)
 
    // fill spectra
    fH2N1 = new TH2D(Form("h2N1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
    fH2N2 = new TH2D(Form("h2N2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
    fH2N3 = new TH2D(Form("h2N3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
 
    fH2E1 = new TH2D(Form("h2E1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
    fH2E2 = new TH2D(Form("h2E2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
    fH2E3 = new TH2D(Form("h2E3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime),
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
          ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
          nbinx,binEdgesx,nbiny,binEdgesy);
 
@@ -316,18 +320,18 @@ void SupernovaModel::LoadFullData(const char *databaseDir)
    }
 
    // set properties
-   fH2N1->SetTitle(Form("#nu_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2N1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2N3->SetTitle(Form("#nu_{x}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2N3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
-   fH2E1->SetTitle(Form("#nu_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2E1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2E3->SetTitle(Form("#nu_{x}, model: %.0f #odot, %.3f, %.0f ms",
+   fH2E3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
    fH2N1->SetStats(0);
