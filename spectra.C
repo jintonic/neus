@@ -3,6 +3,11 @@
 
    // load data
    TFile *input = new TFile("models.root");
+   if (!input->IsOpen()) {
+      cout<<".x ascii2root.C"<<endl;
+      gROOT->Macro("ascii2root.C");
+      input = new TFile("models.root");
+   }
    SupernovaModel *model1301 = (SupernovaModel*) input->Get("model1301");
    SupernovaModel *model1302 = (SupernovaModel*) input->Get("model1302");
    SupernovaModel *model1303 = (SupernovaModel*) input->Get("model1303");
@@ -32,20 +37,28 @@
    TCanvas *can = new TCanvas;
    can->Print("spectra.ps[");
 
-   model1301->IntegratedEnergySpectrum("v_e")->Draw();
-   model1301->IntegratedEnergySpectrum("anti-v_e")->Draw("same");
-   model1301->IntegratedEnergySpectrum("v_x")->Draw("same");
+   TH1D *hVe = model1301->IntegratedNumberSpectrum("v_e");
+   TH1D *haVe= model1301->IntegratedNumberSpectrum("anti-v_e");
+   TH1D *hVx = model1301->IntegratedNumberSpectrum("v_x");
+
+   hVe->GetXaxis()->SetRangeUser(0,50);
+   hVe->GetYaxis()->SetRangeUser(0,480e54);
+   hVe->SetTitle(model1301->GetTitle());
+   hVe->Draw();
+   haVe->Draw("same");
+   hVx->Scale(4);
+   hVx->Draw("same");
+
+   TLegend *leg = new TLegend(0.5,0.30,0.8,0.58);
+   leg->SetFillColor(0);
+   leg->SetBorderSize(0);
+   leg->SetHeader("total number of #nu:");
+   leg->AddEntry(hVe, Form("#nu_{e}: %.1e",hVe->Integral()),"l");
+   leg->AddEntry(haVe,Form("#bar{#nu}_{e}: %.1e",haVe->Integral()),"l");
+   leg->AddEntry(hVx, Form("#nu_{x}: %.1e",hVx->Integral()*3),"l");
+   leg->Draw();
+
    can->Print("spectra.ps");
-
-   //model1301->NumberSpectrum("v_e")->ProfileY()->Draw();
-   //model1301->NumberSpectrum("anti-v_e")->ProfileY()->Draw("same");
-   //model1301->NumberSpectrum("v_x")->ProfileY()->Draw("same");
-   //can->Print("spectra.ps");
-
-   //model1301->IntegratedNumberSpectrum("v_e")->Draw();
-   //model1301->IntegratedNumberSpectrum("anti-v_e")->Draw("same");
-   //model1301->IntegratedNumberSpectrum("v_x")->Draw("same");
-   //can->Print("spectra.ps");
 
    can->Print("spectra.ps]");
 }
