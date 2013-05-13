@@ -1,5 +1,5 @@
 {
-   if (!TClass::GetDict("SupernovaModel")) gSystem->Load("libSNVD.so");
+   if (!TClass::GetDict("Supernova")) gSystem->Load("libSNVD.so");
 
    // load data
    TFile *input = new TFile("models.root");
@@ -8,30 +8,30 @@
       gROOT->Macro("ascii2root.C");
       input = new TFile("models.root");
    }
-   SupernovaModel *model1301 = (SupernovaModel*) input->Get("model1301");
-   SupernovaModel *model1302 = (SupernovaModel*) input->Get("model1302");
-   SupernovaModel *model1303 = (SupernovaModel*) input->Get("model1303");
-   SupernovaModel *model1311 = (SupernovaModel*) input->Get("model1311");
-   SupernovaModel *model1312 = (SupernovaModel*) input->Get("model1312");
-   SupernovaModel *model1313 = (SupernovaModel*) input->Get("model1313");
-   SupernovaModel *model2001 = (SupernovaModel*) input->Get("model2001");
-   SupernovaModel *model2002 = (SupernovaModel*) input->Get("model2002");
-   SupernovaModel *model2003 = (SupernovaModel*) input->Get("model2003");
-   SupernovaModel *model2011 = (SupernovaModel*) input->Get("model2011");
-   SupernovaModel *model2012 = (SupernovaModel*) input->Get("model2012");
-   SupernovaModel *model2013 = (SupernovaModel*) input->Get("model2013");
-   SupernovaModel *model3001 = (SupernovaModel*) input->Get("model3001");
-   SupernovaModel *model3002 = (SupernovaModel*) input->Get("model3002");
-   SupernovaModel *model3003 = (SupernovaModel*) input->Get("model3003");
-   SupernovaModel *model3011 = (SupernovaModel*) input->Get("model3011");
-   SupernovaModel *model3012 = (SupernovaModel*) input->Get("model3012");
-   SupernovaModel *model3013 = (SupernovaModel*) input->Get("model3013");
-   SupernovaModel *model5001 = (SupernovaModel*) input->Get("model5001");
-   SupernovaModel *model5002 = (SupernovaModel*) input->Get("model5002");
-   SupernovaModel *model5003 = (SupernovaModel*) input->Get("model5003");
-   SupernovaModel *model5011 = (SupernovaModel*) input->Get("model5011");
-   SupernovaModel *model5012 = (SupernovaModel*) input->Get("model5012");
-   SupernovaModel *model5013 = (SupernovaModel*) input->Get("model5013");
+   Supernova *model1301 = (Supernova*) input->Get("model1301");
+   Supernova *model1302 = (Supernova*) input->Get("model1302");
+   Supernova *model1303 = (Supernova*) input->Get("model1303");
+   Supernova *model1311 = (Supernova*) input->Get("model1311");
+   Supernova *model1312 = (Supernova*) input->Get("model1312");
+   Supernova *model1313 = (Supernova*) input->Get("model1313");
+   Supernova *model2001 = (Supernova*) input->Get("model2001");
+   Supernova *model2002 = (Supernova*) input->Get("model2002");
+   Supernova *model2003 = (Supernova*) input->Get("model2003");
+   Supernova *model2011 = (Supernova*) input->Get("model2011");
+   Supernova *model2012 = (Supernova*) input->Get("model2012");
+   Supernova *model2013 = (Supernova*) input->Get("model2013");
+   Supernova *model3001 = (Supernova*) input->Get("model3001");
+   Supernova *model3002 = (Supernova*) input->Get("model3002");
+   Supernova *model3003 = (Supernova*) input->Get("model3003");
+   Supernova *model3011 = (Supernova*) input->Get("model3011");
+   Supernova *model3012 = (Supernova*) input->Get("model3012");
+   Supernova *model3013 = (Supernova*) input->Get("model3013");
+   Supernova *model5001 = (Supernova*) input->Get("model5001");
+   Supernova *model5002 = (Supernova*) input->Get("model5002");
+   Supernova *model5003 = (Supernova*) input->Get("model5003");
+   Supernova *model5011 = (Supernova*) input->Get("model5011");
+   Supernova *model5012 = (Supernova*) input->Get("model5012");
+   Supernova *model5013 = (Supernova*) input->Get("model5013");
 
    // draw spectra
    TCanvas *can = new TCanvas;

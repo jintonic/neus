@@ -1,4 +1,6 @@
-#include <TH1D.h>
+#ifndef SUPERNOVA_HH
+#define SUPERNOVA_HH
+
 #include <TH2D.h>
 
 class Supernova : public TNamed
@@ -35,3 +37,5 @@ class Supernova : public TNamed
 
       ClassDef(Supernova,1);
 };
+
+#endif // SUPERNOVA_HH
