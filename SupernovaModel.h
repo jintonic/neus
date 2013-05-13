@@ -1,7 +1,7 @@
 #include <TH1D.h>
 #include <TH2D.h>
 
-class SupernovaModel : public TNamed
+class Supernova : public TNamed
 {
    protected:
       TH1D *fH1Empty;
@@ -14,11 +14,11 @@ class SupernovaModel : public TNamed
       Float_t fReviveTime; // shock revival time in ms
 
    public:
-      SupernovaModel(
+      Supernova(
             Float_t initialMass=13, /* Solar mass */
             Float_t metallicity=0.02,
             Float_t reviveTime=100 /* ms */);
-      virtual ~SupernovaModel();
+      virtual ~Supernova();
 
       void LoadFullData(const char *databaseDir="./intpdata");
       void LoadIntegratedData(const char *databaseDir="./integdata");
@@ -33,5 +33,5 @@ class SupernovaModel : public TNamed
       Double_t Metallicity() { return fMetallicity; }
       Double_t ReviveTime() { return fReviveTime; }
 
-      ClassDef(SupernovaModel,1);
+      ClassDef(Supernova,1);
 };
