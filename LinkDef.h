@@ -1,3 +1,3 @@
 #ifdef __MAKECINT__
-#pragma link C++ class Supernova+;
+#pragma link C++ class NakazatoModel+;
 #endif

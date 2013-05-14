@@ -60,5 +60,11 @@
 
    can->Print("spectra.ps");
 
+   TH2D *hVe2 = model1301->NumberSpectrum("anti-v_e");
+   haVe->Draw();
+   can->Print("spectra.ps");
+   hVe2->ProjectionX()->Draw();
+   can->Print("spectra.ps");
+
    can->Print("spectra.ps]");
 }

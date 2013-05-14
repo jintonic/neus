@@ -1,9 +1,9 @@
-#ifndef SUPERNOVA_HH
-#define SUPERNOVA_HH
+#ifndef NAKAZATOMODEL_HH
+#define NAKAZATOMODEL_HH
 
 #include <TH2D.h>
 
-class Supernova : public TNamed
+class NakazatoModel : public TNamed
 {
    protected:
       TH1D *fH1Empty;
@@ -16,11 +16,11 @@ class Supernova : public TNamed
       Float_t fReviveTime; // shock revival time in ms
 
    public:
-      Supernova(
+      NakazatoModel(
             Float_t initialMass=13, /* Solar mass */
             Float_t metallicity=0.02,
             Float_t reviveTime=100 /* ms */);
-      virtual ~Supernova();
+      virtual ~NakazatoModel();
 
       void LoadFullData(const char *databaseDir="./intpdata");
       void LoadIntegratedData(const char *databaseDir="./integdata");
@@ -35,7 +35,7 @@ class Supernova : public TNamed
       Double_t Metallicity() { return fMetallicity; }
       Double_t ReviveTime() { return fReviveTime; }
 
-      ClassDef(Supernova,1);
+      ClassDef(NakazatoModel,1);
 };
 
-#endif // SUPERNOVA_HH
+#endif // NAKAZATOMODEL_HH

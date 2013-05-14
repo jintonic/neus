@@ -1,6 +1,6 @@
-#include "Supernova.h"
+#include "NakazatoModel.h"
 
-Supernova::Supernova(
+NakazatoModel::NakazatoModel(
       Float_t initialMass, Float_t metallicity, Float_t reviveTime) :
    TNamed(), fH1Empty(0), fH2Empty(0),
    fH1N1(0), fH1N2(0), fH1N3(0), fH1E1(0), fH1E2(0), fH1E3(0),
@@ -19,7 +19,7 @@ Supernova::Supernova(
 //______________________________________________________________________________
 //
 
-Supernova::~Supernova()
+NakazatoModel::~NakazatoModel()
 {
    if (fH1Empty) delete fH1Empty;
    if (fH2Empty) delete fH2Empty;
@@ -45,7 +45,7 @@ Supernova::~Supernova()
 #include <fstream>
 using namespace std;
 
-void Supernova::LoadIntegratedData(const char *databaseDir)
+void NakazatoModel::LoadIntegratedData(const char *databaseDir)
 {
    char *name = Form("%s/integ%.0f0%.0f.data",
          databaseDir, fInitialMass, fReviveTime/100);
@@ -179,7 +179,7 @@ void Supernova::LoadIntegratedData(const char *databaseDir)
 //______________________________________________________________________________
 //
 
-TH1D* Supernova::IntegratedNumberSpectrum(const char *neutrino)
+TH1D* NakazatoModel::IntegratedNumberSpectrum(const char *neutrino)
 {
    if (!fH1N1) return fH1Empty;
 
@@ -201,7 +201,7 @@ TH1D* Supernova::IntegratedNumberSpectrum(const char *neutrino)
 //______________________________________________________________________________
 //
 
-TH1D* Supernova::IntegratedEnergySpectrum(const char *neutrino)
+TH1D* NakazatoModel::IntegratedEnergySpectrum(const char *neutrino)
 {
    if (!fH1E1) return fH1Empty;
 
@@ -223,7 +223,7 @@ TH1D* Supernova::IntegratedEnergySpectrum(const char *neutrino)
 //______________________________________________________________________________
 //
 
-void Supernova::LoadFullData(const char *databaseDir)
+void NakazatoModel::LoadFullData(const char *databaseDir)
 {
    char *name = Form("%s/intp%.0f0%.0f.data",
          databaseDir, fInitialMass, fReviveTime/100);
@@ -354,7 +354,7 @@ void Supernova::LoadFullData(const char *databaseDir)
 //______________________________________________________________________________
 //
 
-TH2D* Supernova::NumberSpectrum(const char *neutrino)
+TH2D* NakazatoModel::NumberSpectrum(const char *neutrino)
 {
    if (!fH2N1) return fH2Empty;
 
@@ -373,7 +373,7 @@ TH2D* Supernova::NumberSpectrum(const char *neutrino)
 //______________________________________________________________________________
 //
 
-TH2D* Supernova::EnergySpectrum(const char *neutrino)
+TH2D* NakazatoModel::EnergySpectrum(const char *neutrino)
 {
    if (!fH2E1) return fH2Empty;
 
