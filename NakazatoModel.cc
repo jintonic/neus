@@ -1,10 +1,18 @@
 #include "NakazatoModel.h"
 
+#include <TDirectory.h>
+
+#include <fstream>
+using namespace std;
+
+#include <CLHEP/Units/SystemOfUnits.h>
+using namespace CLHEP;
+
+//______________________________________________________________________________
+//
+
 NakazatoModel::NakazatoModel(
-      Float_t initialMass, Float_t metallicity, Float_t reviveTime) :
-   TNamed(), fH1Empty(0), fH2Empty(0),
-   fH1N1(0), fH1N2(0), fH1N3(0), fH1E1(0), fH1E2(0), fH1E3(0),
-   fH2N1(0), fH2N2(0), fH2N3(0), fH2E1(0), fH2E2(0), fH2E3(0),
+      Float_t initialMass, Float_t metallicity, Float_t reviveTime) : TNamed(),
    fInitialMass(initialMass), fMetallicity(metallicity), fReviveTime(reviveTime)
 {
    if (metallicity>0.02-0.01) {
@@ -14,6 +22,16 @@ NakazatoModel::NakazatoModel(
       fName = Form("model%.0f1%.0f",fInitialMass,fReviveTime/100);
       fTitle = Form("%.0f Solar mass, 0.004, %.0f ms",fInitialMass,fReviveTime);
    }
+
+   for (UShort_t i=0; i<7; i++) {
+      fH2N[i]=NULL;
+      fH2L[i]=NULL;
+      fHNe[i]=NULL;
+      fHNt[i]=NULL;
+      fHLe[i]=NULL;
+      fHLt[i]=NULL;
+      fHEt[i]=NULL;
+   }
 }
 
 //______________________________________________________________________________
@@ -21,29 +39,19 @@ NakazatoModel::NakazatoModel(
 
 NakazatoModel::~NakazatoModel()
 {
-   if (fH1Empty) delete fH1Empty;
-   if (fH2Empty) delete fH2Empty;
-
-   if (fH1N1) delete fH1N1;
-   if (fH1N2) delete fH1N2;
-   if (fH1N3) delete fH1N3;
-   if (fH1E1) delete fH1E1;
-   if (fH1E2) delete fH1E2;
-   if (fH1E3) delete fH1E3;
-
-   if (fH2N1) delete fH2N1;
-   if (fH2N2) delete fH2N2;
-   if (fH2N3) delete fH2N3;
-   if (fH2E1) delete fH2E1;
-   if (fH2E2) delete fH2E2;
-   if (fH2E3) delete fH2E3;
+   for (UShort_t i=0; i<7; i++) {
+      if (fH2N[i]) delete fH2N[i];
+      if (fH2L[i]) delete fH2L[i];
+      if (fHNe[i]) delete fHNe[i];
+      if (fHNt[i]) delete fHNt[i];
+      if (fHLe[i]) delete fHLe[i];
+      if (fHLt[i]) delete fHLt[i];
+      if (fHEt[i]) delete fHEt[i];
+   }
 }
 
 //______________________________________________________________________________
 //
-
-#include <fstream>
-using namespace std;
 
 void NakazatoModel::LoadIntegratedData(const char *databaseDir)
 {
@@ -57,9 +65,6 @@ void NakazatoModel::LoadIntegratedData(const char *databaseDir)
    ifstream file(name);
    if (!(file.is_open())) {
       Warning("LoadIntegratedData", "%s cannot be read!", name);
-      fH1Empty = new TH1D(Form("h1Empty%.0f%.0f%.0f",
-               fInitialMass,fMetallicity*1000,fReviveTime/100),
-            "Empty spectrum",0,0.,0.);
       return;
    }
 
@@ -72,17 +77,37 @@ void NakazatoModel::LoadIntegratedData(const char *databaseDir)
    Double_t binEdges[nbins+1]={0};
    Double_t number1[nbins];
    Double_t number2[nbins];
-   Double_t number3[nbins];
+   Double_t numberx[nbins];
    Double_t energy1[nbins];
    Double_t energy2[nbins];
-   Double_t energy3[nbins];
+   Double_t energyx[nbins];
+   Double_t maxN1=0,maxN2=0, maxNx=0, maxL1=0, maxL2=0, maxLx=0;
+   Double_t minN1=1e100, minN2=1e100, minNx=1e100;
+   Double_t minL1=1e100, minL2=1e100, minLx=1e100;
 
-   Double_t energy, n1, n2, n3, e1, e2, e3;
+   Double_t energy, n1, n2, nx, e1, e2, ex;
 
    UShort_t i=0;
-   while(file>>energy>>energy>>n1>>n2>>n3>>e1>>e2>>e3) {
-      number1[i]=n1; number2[i]=n2; number3[i]=n3; 
-      energy1[i]=e1; energy2[i]=e2; energy3[i]=e3;
+   while(file>>energy>>energy>>n1>>n2>>nx>>e1>>e2>>ex) {
+      number1[i]=n1; number2[i]=n2; numberx[i]=nx; 
+      energy1[i]=e1; energy2[i]=e2; energyx[i]=ex;
+
+      if (n1>maxN1) maxN1=n1;
+      if (n2>maxN2) maxN2=n2;
+      if (nx>maxNx) maxNx=nx;
+
+      if (e1>maxL1) maxL1=e1;
+      if (e2>maxL2) maxL2=e2;
+      if (ex>maxLx) maxLx=ex;
+
+      if (n1<minN1) minN1=n1;
+      if (n2<minN2) minN2=n2;
+      if (nx<minNx) minNx=nx;
+
+      if (e1<minL1) minL1=e1;
+      if (e2<minL2) minL2=e2;
+      if (ex<minLx) minLx=ex;
+
       i++;
       binEdges[i]=energy;
    }
@@ -90,134 +115,98 @@ void NakazatoModel::LoadIntegratedData(const char *databaseDir)
    file.close();
 
    // fill spectra
-   fH1N1 = new TH1D(Form("h1N1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
-   fH1N2 = new TH1D(Form("h1N2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
-   fH1N3 = new TH1D(Form("h1N3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
+   for (UShort_t i=1; i<=3; i++) {
+      fHNe[i] = new TH1D(Form("hNe%d%.0f%.0f%.0f",i,
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            ";Energy [MeV];Number luminosity/(1 MeV)",nbins,binEdges);
 
-   fH1E1 = new TH1D(Form("h1E1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
-   fH1E2 = new TH1D(Form("h1E2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
-   fH1E3 = new TH1D(Form("h1E3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
+      fHLe[i] = new TH1D(Form("hLe%d%.0f%.0f%.0f",i,
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            ";Energy [MeV];Energy luminosity [erg]/(1 MeV)",nbins,binEdges);
+   }
+   for (UShort_t i=4; i<=6; i++) {
+      fHNe[i]=fHNe[3];
+      fHLe[i]=fHLe[3];
+   }
 
    for (i=1; i<=nbins; i++) {
-      fH1N1->SetBinContent(i,number1[i-1]);
-      fH1N2->SetBinContent(i,number2[i-1]);
-      fH1N3->SetBinContent(i,number3[i-1]);
+      fHNe[1]->SetBinContent(i,number1[i-1]);
+      fHNe[2]->SetBinContent(i,number2[i-1]);
+      fHNe[3]->SetBinContent(i,numberx[i-1]);
 
-      fH1E1->SetBinContent(i,energy1[i-1]);
-      fH1E2->SetBinContent(i,energy2[i-1]);
-      fH1E3->SetBinContent(i,energy3[i-1]);
+      fHLe[1]->SetBinContent(i,energy1[i-1]);
+      fHLe[2]->SetBinContent(i,energy2[i-1]);
+      fHLe[3]->SetBinContent(i,energyx[i-1]);
    }
 
    // set properties
-   fH1N1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fHNe[1]->SetMaximum(maxN1);
+   fHNe[1]->SetMinimum(minN1);
+   fHNe[2]->SetMaximum(maxN2);
+   fHNe[2]->SetMinimum(minN2);
+   fHNe[3]->SetMaximum(maxNx);
+   fHNe[3]->SetMinimum(minNx);
+
+   fHLe[1]->SetMaximum(maxL1);
+   fHLe[1]->SetMinimum(minL1);
+   fHLe[2]->SetMaximum(maxL2);
+   fHLe[2]->SetMinimum(minL2);
+   fHLe[3]->SetMaximum(maxLx);
+   fHLe[3]->SetMinimum(minLx);
+
+   fHNe[1]->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fHNe[2]->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH1N3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-
-   fH1E1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fH1E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fH1E3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fHNe[3]->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
-   fH1N1->SetStats(0);
-   fH1N2->SetStats(0);
-   fH1N3->SetStats(0);
+   fHLe[1]->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+            fInitialMass, fMetallicity, fReviveTime));
+   fHLe[2]->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+            fInitialMass, fMetallicity, fReviveTime));
+   fHLe[3]->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+            fInitialMass, fMetallicity, fReviveTime));
 
-   fH1E1->SetStats(0);
-   fH1E2->SetStats(0);
-   fH1E3->SetStats(0);
+   fHNe[1]->SetStats(0);
+   fHNe[2]->SetStats(0);
+   fHNe[3]->SetStats(0);
 
-   fH1N1->SetLineColor(kBlack);
-   fH1N2->SetLineColor(kRed);
-   fH1N3->SetLineColor(kBlue);
+   fHLe[1]->SetStats(0);
+   fHLe[2]->SetStats(0);
+   fHLe[3]->SetStats(0);
 
-   fH1E1->SetLineColor(kBlack);
-   fH1E2->SetLineColor(kRed);
-   fH1E3->SetLineColor(kBlue);
+   fHNe[1]->SetLineColor(kBlack);
+   fHNe[2]->SetLineColor(kRed);
+   fHNe[3]->SetLineColor(kBlue);
 
-   fH1N1->SetMarkerColor(kBlack);
-   fH1N2->SetMarkerColor(kRed);
-   fH1N3->SetMarkerColor(kBlue);
+   fHLe[1]->SetLineColor(kBlack);
+   fHLe[2]->SetLineColor(kRed);
+   fHLe[3]->SetLineColor(kBlue);
 
-   fH1E1->SetMarkerColor(kBlack);
-   fH1E2->SetMarkerColor(kRed);
-   fH1E3->SetMarkerColor(kBlue);
+   fHNe[1]->SetMarkerColor(kBlack);
+   fHNe[2]->SetMarkerColor(kRed);
+   fHNe[3]->SetMarkerColor(kBlue);
 
-   fH1N1->SetMarkerStyle(20);
-   fH1N2->SetMarkerStyle(20);
-   fH1N3->SetMarkerStyle(20);
+   fHLe[1]->SetMarkerColor(kBlack);
+   fHLe[2]->SetMarkerColor(kRed);
+   fHLe[3]->SetMarkerColor(kBlue);
 
-   fH1E1->SetMarkerStyle(20);
-   fH1E2->SetMarkerStyle(20);
-   fH1E3->SetMarkerStyle(20);
+   fHNe[1]->SetMarkerStyle(20);
+   fHNe[2]->SetMarkerStyle(20);
+   fHNe[3]->SetMarkerStyle(20);
 
-   fH1N1->SetMarkerSize(0.6);
-   fH1N2->SetMarkerSize(0.6);
-   fH1N3->SetMarkerSize(0.6);
+   fHLe[1]->SetMarkerStyle(20);
+   fHLe[2]->SetMarkerStyle(20);
+   fHLe[3]->SetMarkerStyle(20);
 
-   fH1E1->SetMarkerSize(0.6);
-   fH1E2->SetMarkerSize(0.6);
-   fH1E3->SetMarkerSize(0.6);
-}
+   fHNe[1]->SetMarkerSize(0.6);
+   fHNe[2]->SetMarkerSize(0.6);
+   fHNe[3]->SetMarkerSize(0.6);
 
-//______________________________________________________________________________
-//
-
-TH1D* NakazatoModel::IntegratedNumberSpectrum(const char *neutrino)
-{
-   if (!fH1N1) return fH1Empty;
-
-   TString species(neutrino);
-   if (species=="v_e") return fH1N1;
-   else if (species=="anti-v_e") return fH1N2;
-   else if (species=="v_x") return fH1N3;
-   else {
-      Warning("IntegratedNumberSpectrum",
-            "Neutrino species %s is not defined!",neutrino);
-      Warning("IntegratedNumberSpectrum",
-            "Please select one from v_e, anti-v_e or v_x.");
-      Warning("IntegratedNumberSpectrum",
-            "The spectrum of #nu_{e} is returned.");
-      return fH1N1;
-   }
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NakazatoModel::IntegratedEnergySpectrum(const char *neutrino)
-{
-   if (!fH1E1) return fH1Empty;
-
-   TString species(neutrino);
-   if (species=="v_e") return fH1E1;
-   else if (species=="anti-v_e") return fH1E2;
-   else if (species=="v_x") return fH1E3;
-   else {
-      Warning("IntegratedEnergySpectrum",
-            "Neutrino species %s is not defined!",neutrino);
-      Warning("IntegratedEnergySpectrum",
-            "Please select one from v_e, anti-v_e or v_x.");
-      Warning("IntegratedEnergySpectrum",
-            "The spectrum of #nu_{e} is returned.");
-      return fH1E1;
-   }
+   fHLe[1]->SetMarkerSize(0.6);
+   fHLe[2]->SetMarkerSize(0.6);
+   fHLe[3]->SetMarkerSize(0.6);
 }
 
 //______________________________________________________________________________
@@ -235,9 +224,6 @@ void NakazatoModel::LoadFullData(const char *databaseDir)
    ifstream file(name);
    if (!(file.is_open())) {
       Warning("LoadFullData", "%s cannot be read!", name);
-      fH2Empty = new TH2D(Form("h2Empty%.0f%.0f%.0f",
-               fInitialMass,fMetallicity*1000,fReviveTime/100),
-            "Empty spectrum",0,0.,0.,0,0.,0.);
       return;
    }
 
@@ -247,19 +233,39 @@ void NakazatoModel::LoadFullData(const char *databaseDir)
    Double_t binEdgesy[nbiny+1]={0};
    Double_t number1[nbinx][nbiny];
    Double_t number2[nbinx][nbiny];
-   Double_t number3[nbinx][nbiny];
+   Double_t numberx[nbinx][nbiny];
    Double_t energy1[nbinx][nbiny];
    Double_t energy2[nbinx][nbiny];
-   Double_t energy3[nbinx][nbiny];
+   Double_t energyx[nbinx][nbiny];
+   Double_t maxN1=0,maxN2=0, maxNx=0, maxL1=0, maxL2=0, maxLx=0;
+   Double_t minN1=1e100, minN2=1e100, minNx=1e100;
+   Double_t minL1=1e100, minL2=1e100, minLx=1e100;
 
-   Double_t time, energy, n1, n2, n3, e1, e2, e3;
+   Double_t time, energy, n1, n2, nx, e1, e2, ex;
 
    UShort_t ix=0, iy=0;
    while(file>>time) {
       ix=0;
-      while(file>>energy>>energy>>n1>>n2>>n3>>e1>>e2>>e3) {
-         number1[ix][iy]=n1; number2[ix][iy]=n2; number3[ix][iy]=n3;
-         energy1[ix][iy]=e1; energy2[ix][iy]=e2; energy3[ix][iy]=e3;
+      while(file>>energy>>energy>>n1>>n2>>nx>>e1>>e2>>ex) {
+         number1[ix][iy]=n1; number2[ix][iy]=n2; numberx[ix][iy]=nx;
+         energy1[ix][iy]=e1; energy2[ix][iy]=e2; energyx[ix][iy]=ex;
+
+         if (n1>maxN1) maxN1=n1;
+         if (n2>maxN2) maxN2=n2;
+         if (nx>maxNx) maxNx=nx;
+
+         if (e1>maxL1) maxL1=e1;
+         if (e2>maxL2) maxL2=e2;
+         if (ex>maxLx) maxLx=ex;
+
+         if (n1<minN1) minN1=n1;
+         if (n2<minN2) minN2=n2;
+         if (nx<minNx) minNx=nx;
+
+         if (e1<minL1) minL1=e1;
+         if (e2<minL2) minL2=e2;
+         if (ex<minLx) minLx=ex;
+
          ix++;
          binEdgesx[ix]=energy;
          if (ix>=nbinx) break;
@@ -280,115 +286,355 @@ void NakazatoModel::LoadFullData(const char *databaseDir)
    binEdgesy[nbiny] = binEdgesy[nbiny]
       + (binEdgesy[nbiny] - binEdgesy[nbiny-1])/2.;
 
+   // create histograms
+   for (UShort_t i=1; i<=3; i++) {
+      fH2N[i] = new TH2D(Form("h2N%d%.0f%.0f%.0f", i,
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
+            nbinx,binEdgesx,nbiny,binEdgesy);
+
+      fH2L[i] = new TH2D(Form("h2L%d%.0f%.0f%.0f", i,
+               fInitialMass,fMetallicity*1000,fReviveTime/100),
+            ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
+            nbinx,binEdgesx,nbiny,binEdgesy);
+   }
+   for (UShort_t i=4; i<=6; i++) {
+      fH2N[i]=fH2N[3];
+      fH2L[i]=fH2L[3];
+   }
+
    // fill spectra
-   fH2N1 = new TH2D(Form("h2N1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-   fH2N2 = new TH2D(Form("h2N2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-   fH2N3 = new TH2D(Form("h2N3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Number luminosity/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-
-   fH2E1 = new TH2D(Form("h2E1%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-   fH2E2 = new TH2D(Form("h2E2%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-   fH2E3 = new TH2D(Form("h2E3%.0f%.0f%0.f",
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         ";Energy [MeV];Time [second];Energy luminosity [erg]/(1 MeV)",
-         nbinx,binEdgesx,nbiny,binEdgesy);
-
    for (ix=0; ix<nbinx; ix++) {
       for (iy=0; iy<nbiny; iy++) {
-         fH2N1->SetBinContent(ix+1,iy+1,number1[ix][iy]);
-         fH2N2->SetBinContent(ix+1,iy+1,number2[ix][iy]);
-         fH2N3->SetBinContent(ix+1,iy+1,number3[ix][iy]);
+         fH2N[1]->SetBinContent(ix+1,iy+1,number1[ix][iy]);
+         fH2N[2]->SetBinContent(ix+1,iy+1,number2[ix][iy]);
+         fH2N[3]->SetBinContent(ix+1,iy+1,numberx[ix][iy]);
 
-         fH2E1->SetBinContent(ix+1,iy+1,energy1[ix][iy]);
-         fH2E2->SetBinContent(ix+1,iy+1,energy2[ix][iy]);
-         fH2E3->SetBinContent(ix+1,iy+1,energy3[ix][iy]);
+         fH2L[1]->SetBinContent(ix+1,iy+1,energy1[ix][iy]);
+         fH2L[2]->SetBinContent(ix+1,iy+1,energy2[ix][iy]);
+         fH2L[3]->SetBinContent(ix+1,iy+1,energyx[ix][iy]);
       }
    }
 
    // set properties
-   fH2N1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2N[1]->SetMaximum(maxN1);
+   fH2N[1]->SetMinimum(minN1);
+   fH2N[2]->SetMaximum(maxN2);
+   fH2N[2]->SetMinimum(minN2);
+   fH2N[3]->SetMaximum(maxNx);
+   fH2N[3]->SetMinimum(minNx);
+
+   fH2L[1]->SetMaximum(maxL1);
+   fH2L[1]->SetMinimum(minL1);
+   fH2L[2]->SetMaximum(maxL2);
+   fH2L[2]->SetMinimum(minL2);
+   fH2L[3]->SetMaximum(maxLx);
+   fH2L[3]->SetMinimum(minLx);
+
+   fH2N[1]->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2N2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2N[2]->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2N3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2N[3]->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
-   fH2E1->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2L[1]->SetTitle(Form("#nu_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2E2->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2L[2]->SetTitle(Form("#bar{#nu}_{e}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
-   fH2E3->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
+   fH2L[3]->SetTitle(Form("#nu_{x}, model: %.0f M_{#odot}, %.3f, %.0f ms",
             fInitialMass, fMetallicity, fReviveTime));
 
-   fH2N1->SetStats(0);
-   fH2N2->SetStats(0);
-   fH2N3->SetStats(0);
+   fH2N[1]->SetStats(0);
+   fH2N[2]->SetStats(0);
+   fH2N[3]->SetStats(0);
 
-   fH2E1->SetStats(0);
-   fH2E2->SetStats(0);
-   fH2E3->SetStats(0);
+   fH2L[1]->SetStats(0);
+   fH2L[2]->SetStats(0);
+   fH2L[3]->SetStats(0);
 
-   fH2N1->SetLineColor(kBlack);
-   fH2N2->SetLineColor(kRed);
-   fH2N3->SetLineColor(kBlue);
+   fH2N[1]->SetLineColor(kBlack);
+   fH2N[2]->SetLineColor(kRed);
+   fH2N[3]->SetLineColor(kBlue);
 
-   fH2E1->SetLineColor(kBlack);
-   fH2E2->SetLineColor(kRed);
-   fH2E3->SetLineColor(kBlue);
+   fH2L[1]->SetLineColor(kBlack);
+   fH2L[2]->SetLineColor(kRed);
+   fH2L[3]->SetLineColor(kBlue);
 }
 
 //______________________________________________________________________________
 //
 
-TH2D* NakazatoModel::NumberSpectrum(const char *neutrino)
+TH2D* NakazatoModel::H2N(UShort_t type)
 {
-   if (!fH2N1) return fH2Empty;
-
-   TString species(neutrino);
-   if (species=="v_e") return fH2N1;
-   else if (species=="anti-v_e") return fH2N2;
-   else if (species=="v_x") return fH2N3;
-   else {
-      Warning("NumberSpectrum","Neutrino species %s is not defined!",neutrino);
-      Warning("NumberSpectrum","Please select one from v_e, anti-v_e or v_x.");
-      Warning("NumberSpectrum","The spectrum of #nu_{e} is returned.");
-      return fH2N1;
+   if (type<1 || type>6) {
+      Warning("H2N","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("H2N","NULL pointer is returned!");
+      return NULL;
    }
+   if (!fH2N[type]) {
+      Warning("H2N","Spectrum does not exist!");
+      Warning("H2N","Is the database correctly loaded?");
+      Warning("H2N","NULL pointer is returned!");
+   }
+   return fH2N[type];
 }
 
 //______________________________________________________________________________
 //
 
-TH2D* NakazatoModel::EnergySpectrum(const char *neutrino)
+TH2D* NakazatoModel::H2L(UShort_t type)
 {
-   if (!fH2E1) return fH2Empty;
-
-   TString species(neutrino);
-   if (species=="v_e") return fH2E1;
-   else if (species=="anti-v_e") return fH2E2;
-   else if (species=="v_x") return fH2E3;
-   else {
-      Warning("EnergySpectrum","Neutrino species %s is not defined!",neutrino);
-      Warning("EnergySpectrum","Please select one from v_e, anti-v_e or v_x.");
-      Warning("EnergySpectrum","The spectrum of #nu_{e} is returned.");
-      return fH2E1;
+   if (type<1 || type>6) {
+      Warning("H2L","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("H2L","NULL pointer is returned!");
+      return NULL;
    }
+   if (!fH2L[type]) {
+      Warning("H2L","Spectrum does not exist!");
+      Warning("H2L","Is the database correctly loaded?");
+      Warning("H2L","NULL pointer is returned!");
+   }
+   return fH2L[type];
 }
 
 //______________________________________________________________________________
 //
 
+TH1D* NakazatoModel::HNe(UShort_t type, Double_t tmax)
+{
+   if (type<1 || type>6) {
+      Warning("HNe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HNe","NULL pointer is returned!");
+      return NULL;
+   }
+   if (!fHNe[type]) {
+      Warning("HNe","Spectrum does not exist!");
+      Warning("HNe","Is the database correctly loaded?");
+      Warning("HNe","NULL pointer is returned!");
+      return NULL;
+   }
+
+   if (tmax==0) return fHNe[type]; // from database
+
+   TH1D *h = (TH1D*) gDirectory->Get(Form("hNe%d%.0f%.0f%.0f%f",type,
+            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax/second));
+   if (h) return h; // from memory
+
+   // calculate integral in [0, tmax]
+   fHNe[type]->Reset();
+   for (UShort_t ix=1; ix<=fH2N[type]->GetNbinsX(); ix++) {
+      Double_t content=0;
+      for (UShort_t iy=1; iy<=fH2N[type]->GetNbinsY(); iy++) {
+         if (tmax<fH2N[type]->GetYaxis()->GetBinCenter(iy)*second) break;
+         content += fH2N[type]->GetBinContent(ix,iy) *
+            fH2N[type]->GetYaxis()->GetBinWidth(iy);
+      }
+      fHNe[type]->SetBinContent(ix,content);
+   }
+   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax/second));
+   return fHNe[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NakazatoModel::HLe(UShort_t type, Double_t tmax)
+{
+   if (type<1 || type>6) {
+      Warning("HLe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HLe","NULL pointer is returned!");
+      return NULL;
+   }
+   if (!fHLe[type]) {
+      Warning("HLe","Spectrum does not exist!");
+      Warning("HLe","Is the database correctly loaded?");
+      Warning("HLe","NULL pointer is returned!");
+      return NULL;
+   }
+
+   if (tmax==0) return fHLe[type]; // from database
+
+   TH1D *h = (TH1D*) gDirectory->Get(Form("hLe%d%.0f%.0f%.0f%f",type,
+            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax/second));
+   if (h) return h; // from memory
+
+   // calculate integral in [0, tmax]
+   fHLe[type]->Reset();
+   for (UShort_t ix=1; ix<=fH2L[type]->GetNbinsX(); ix++) {
+      Double_t content=0;
+      for (UShort_t iy=1; iy<=fH2L[type]->GetNbinsY(); iy++) {
+         if (tmax<fH2L[type]->GetYaxis()->GetBinCenter(iy)*second) break;
+         content += fH2L[type]->GetBinContent(ix,iy) *
+            fH2L[type]->GetYaxis()->GetBinWidth(iy);
+      }
+      fHLe[type]->SetBinContent(ix,content);
+   }
+   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax/second));
+   return fHLe[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NakazatoModel::HNt(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HNt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (!fH2N[type]) {
+      Warning("HNt","Spectrum does not exist!");
+      Warning("HNt","Is the database correctly loaded?");
+      Warning("HNt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (fHNt[type]) return fHNt[type];
+
+   fHNt[type] = fH2N[type]->ProjectionY(Form("hNt%d%.0f%.0f%.0f",type,
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
+         1,1,"e");
+   fHNt[type]->Reset();
+   fHNt[type]->SetStats(0);
+
+   // calculate integral
+   for (UShort_t iy=1; iy<=fH2N[type]->GetNbinsY(); iy++) {
+      Double_t content=0;
+      for (UShort_t ix=1; ix<=fH2N[type]->GetNbinsX(); ix++)
+         content += fH2N[type]->GetBinContent(ix,iy) *
+            fH2N[type]->GetXaxis()->GetBinWidth(ix);
+      fHNt[type]->SetBinContent(iy,content);
+   }
+   return fHNt[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NakazatoModel::HLt(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HLt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (!fH2L[type]) {
+      Warning("HLt","Spectrum does not exist!");
+      Warning("HLt","Is the database correctly loaded?");
+      Warning("HLt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (fHLt[type]) return fHLt[type];
+
+   fHLt[type] = fH2L[type]->ProjectionY(Form("hLt%d%.0f%.0f%.0f",type,
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
+         1,1,"e");
+   fHLt[type]->Reset();
+   fHLt[type]->SetStats(0);
+   fHLt[type]->GetYaxis()->SetTitle("Luminosity [erg] / second");
+
+   // calculate integral
+   for (UShort_t iy=1; iy<=fH2L[type]->GetNbinsY(); iy++) {
+      Double_t content=0;
+      for (UShort_t ix=1; ix<=fH2L[type]->GetNbinsX(); ix++)
+         content += fH2L[type]->GetBinContent(ix,iy) *
+            fH2L[type]->GetXaxis()->GetBinWidth(ix);
+      fHLt[type]->SetBinContent(iy,content);
+   }
+   return fHLt[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NakazatoModel::HEt(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HEt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (!fH2N[type]) {
+      Warning("HEt","Spectrum does not exist!");
+      Warning("HEt","Is the database correctly loaded?");
+      Warning("HEt","NULL pointer is returned!");
+      return NULL;
+   }
+   if (fHEt[type]) return fHEt[type];
+
+   fHEt[type] = fH2N[type]->ProjectionY(Form("hEt%d%.0f%.0f%.0f",type,
+            fInitialMass,fMetallicity*1000,fReviveTime/100),
+         1,1,"e");
+   fHEt[type]->Reset();
+   fHEt[type]->SetStats(0);
+   fHEt[type]->GetYaxis()->SetTitle("Average energy [MeV] / second");
+
+   // calculate average
+   for (UShort_t iy=1; iy<=fH2N[type]->GetNbinsY(); iy++) {
+      Double_t totalE=0, totalN=0;
+      for (UShort_t ix=1; ix<=fH2N[type]->GetNbinsX(); ix++) {
+         totalN += fH2N[type]->GetBinContent(ix,iy) *
+            fH2N[type]->GetXaxis()->GetBinWidth(ix);
+         totalE += fH2N[type]->GetBinContent(ix,iy) * 
+            fH2N[type]->GetXaxis()->GetBinWidth(ix) *
+            fH2N[type]->GetXaxis()->GetBinCenter(ix);
+      }
+      fHEt[type]->SetBinContent(iy,totalE/totalN);
+   }
+   return fHEt[type];
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::N2(UShort_t type, Double_t energy, Double_t time)
+{
+   TH2D *h = H2N(type);
+   return h->Interpolate(energy/MeV, time/second);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::Nt(UShort_t type, Double_t time)
+{
+   TH1D *h = HNt(type);
+   return h->Interpolate(time/second);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::Ne(UShort_t type, Double_t energy, Double_t tmax)
+{
+   TH1D *h = HNe(type,tmax);
+   return h->Interpolate(energy/MeV);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::E2(UShort_t type, Double_t energy, Double_t time)
+{
+   TH2D *h = H2L(type);
+   return h->Interpolate(energy/MeV, time/second);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::Lt(UShort_t type, Double_t time)
+{
+   TH1D *h = HLt(type);
+   return h->Interpolate(time/second);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NakazatoModel::Le(UShort_t type, Double_t energy, Double_t tmax)
+{
+   TH1D *h = HLe(type,tmax);
+   return h->Interpolate(energy/MeV);
+}

@@ -165,4 +165,7 @@ clean:
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
+%.exe:%.C
+	$(CXX) $< $(CXXFLAGS) $(LIBS) -L. -l$(LIBNAME) -o $@
+
 .PHONY: all info tags clean
