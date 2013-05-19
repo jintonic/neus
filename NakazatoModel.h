@@ -23,23 +23,15 @@ class NakazatoModel : public TNamed
       void LoadFullData(const char *databaseDir="./intpdata");
       void LoadIntegratedData(const char *databaseDir="./integdata");
 
-      TH2D* H2N(UShort_t type=1);
-      TH1D* HNt(UShort_t type=1);
-      TH1D* HNe(UShort_t type=1, Double_t tmax=0);
+      TH2D* H2N(UShort_t type=1); // N(E, t)
+      TH1D* HNt(UShort_t type=1); // N(t)
+      TH1D* HNe(UShort_t type=1, Double_t tmax=0); // N(E)
 
-      Double_t N2(UShort_t type, Double_t energy, Double_t time);
-      Double_t Nt(UShort_t type, Double_t time);
-      Double_t Ne(UShort_t type, Double_t energy, Double_t tmax);
+      TH2D* H2L(UShort_t type=1); // L(E, t)
+      TH1D* HLt(UShort_t type=1); // L(t)
+      TH1D* HLe(UShort_t type=1, Double_t tmax=0); // L(E)
 
-      TH2D* H2L(UShort_t type=1);
-      TH1D* HLt(UShort_t type=1);
-      TH1D* HLe(UShort_t type=1, Double_t tmax=0);
-
-      Double_t E2(UShort_t type, Double_t energy, Double_t time);
-      Double_t Lt(UShort_t type, Double_t time);
-      Double_t Le(UShort_t type, Double_t energy, Double_t tmax);
-
-      TH1D* HEt(UShort_t type=1);
+      TH1D* HEt(UShort_t type=1); // <E>(t)
 
       Double_t InitialMass() { return fInitialMass; }
       Double_t Metallicity() { return fMetallicity; }

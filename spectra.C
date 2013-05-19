@@ -5,9 +5,6 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 
-#include <CLHEP/Units/SystemOfUnits.h>
-using namespace CLHEP;
-
 #include <iostream>
 using namespace std;
 
@@ -72,7 +69,7 @@ int main()
 
    can->Print("spectra.ps");
 
-   Double_t tmax=18*second;
+   Double_t tmax=18;/*second*/
    hNe1 = model1301->HNe(1, tmax);
    hNe2 = model1301->HNe(2, tmax);
    hNex = model1301->HNe(3, tmax);
@@ -86,7 +83,7 @@ int main()
    hNex->Draw("same");
 
    leg->Clear();
-   leg->SetHeader(Form("total number of #nu within %.0f second:",tmax/second));
+   leg->SetHeader(Form("total number of #nu within %.0f second:",tmax));
    leg->AddEntry(hNe1, Form("#nu_{e}: %.1e",hNe1->Integral()),"l");
    leg->AddEntry(hNe2,Form("#bar{#nu}_{e}: %.1e",hNe2->Integral()),"l");
    leg->AddEntry(hNex, Form("#nu_{x}: %.1e",hNex->Integral()*4),"l");

@@ -5,9 +5,6 @@
 #include <fstream>
 using namespace std;
 
-#include <CLHEP/Units/SystemOfUnits.h>
-using namespace CLHEP;
-
 //______________________________________________________________________________
 //
 
@@ -418,7 +415,7 @@ TH1D* NakazatoModel::HNe(UShort_t type, Double_t tmax)
    if (tmax==0) return fHNe[type]; // from database
 
    TH1D *h = (TH1D*) gDirectory->Get(Form("hNe%d%.0f%.0f%.0f%f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax/second));
+            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
    if (h) return h; // from memory
 
    // calculate integral in [0, tmax]
@@ -426,13 +423,13 @@ TH1D* NakazatoModel::HNe(UShort_t type, Double_t tmax)
    for (UShort_t ix=1; ix<=fH2N[type]->GetNbinsX(); ix++) {
       Double_t content=0;
       for (UShort_t iy=1; iy<=fH2N[type]->GetNbinsY(); iy++) {
-         if (tmax<fH2N[type]->GetYaxis()->GetBinCenter(iy)*second) break;
+         if (tmax<fH2N[type]->GetYaxis()->GetBinCenter(iy)) break;
          content += fH2N[type]->GetBinContent(ix,iy) *
             fH2N[type]->GetYaxis()->GetBinWidth(iy);
       }
       fHNe[type]->SetBinContent(ix,content);
    }
-   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax/second));
+   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax));
    return fHNe[type];
 }
 
@@ -456,7 +453,7 @@ TH1D* NakazatoModel::HLe(UShort_t type, Double_t tmax)
    if (tmax==0) return fHLe[type]; // from database
 
    TH1D *h = (TH1D*) gDirectory->Get(Form("hLe%d%.0f%.0f%.0f%f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax/second));
+            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
    if (h) return h; // from memory
 
    // calculate integral in [0, tmax]
@@ -464,13 +461,13 @@ TH1D* NakazatoModel::HLe(UShort_t type, Double_t tmax)
    for (UShort_t ix=1; ix<=fH2L[type]->GetNbinsX(); ix++) {
       Double_t content=0;
       for (UShort_t iy=1; iy<=fH2L[type]->GetNbinsY(); iy++) {
-         if (tmax<fH2L[type]->GetYaxis()->GetBinCenter(iy)*second) break;
+         if (tmax<fH2L[type]->GetYaxis()->GetBinCenter(iy)) break;
          content += fH2L[type]->GetBinContent(ix,iy) *
             fH2L[type]->GetYaxis()->GetBinWidth(iy);
       }
       fHLe[type]->SetBinContent(ix,content);
    }
-   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax/second));
+   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax));
    return fHLe[type];
 }
 
@@ -588,53 +585,3 @@ TH1D* NakazatoModel::HEt(UShort_t type)
 //______________________________________________________________________________
 //
 
-Double_t NakazatoModel::N2(UShort_t type, Double_t energy, Double_t time)
-{
-   TH2D *h = H2N(type);
-   return h->Interpolate(energy/MeV, time/second);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NakazatoModel::Nt(UShort_t type, Double_t time)
-{
-   TH1D *h = HNt(type);
-   return h->Interpolate(time/second);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NakazatoModel::Ne(UShort_t type, Double_t energy, Double_t tmax)
-{
-   TH1D *h = HNe(type,tmax);
-   return h->Interpolate(energy/MeV);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NakazatoModel::E2(UShort_t type, Double_t energy, Double_t time)
-{
-   TH2D *h = H2L(type);
-   return h->Interpolate(energy/MeV, time/second);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NakazatoModel::Lt(UShort_t type, Double_t time)
-{
-   TH1D *h = HLt(type);
-   return h->Interpolate(time/second);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NakazatoModel::Le(UShort_t type, Double_t energy, Double_t tmax)
-{
-   TH1D *h = HLe(type,tmax);
-   return h->Interpolate(energy/MeV);
-}
