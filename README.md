@@ -15,16 +15,16 @@ The database files have to be downloaded from http://asphwww.ph.noda.tus.ac.jp/s
 and extracted to the local machine.
 
 The intepolation of Livermore model is provided in 
-[jintonic/total](https://github.com/jintonic/total),
+https://github.com/jintonic/total,
 the library has to be compiled against it as well.
 The location of the locally installed
-[jintonic/total](https://github.com/jintonic/total) library
-can be specified in the second line of the makefile.
+https://github.com/jintonic/total library
+can be specified in the second line of the [makefile](Makefile).
 
 ```make && make install``` will compile the library libNEUS.so and
 copy it to ```/prefix/lib/```. 
 The header files will be copied to ```/prefix/include/NEUS/```.
-The prefix can be specified in the first line of the makefile.
+The prefix can be specified in the first line of the [makefile](Makefile).
 
 #####Usage
 The usage of classes is demonstrated in *.C files. 
