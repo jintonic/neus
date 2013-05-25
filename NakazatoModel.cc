@@ -1,5 +1,6 @@
 #include "NakazatoModel.h"
 
+#include <TH2D.h>
 #include <TDirectory.h>
 
 #include <fstream>
@@ -8,7 +9,7 @@ using namespace std;
 //______________________________________________________________________________
 //
 
-NakazatoModel::NakazatoModel(
+NEUS::NakazatoModel::NakazatoModel(
       Float_t initialMass, Float_t metallicity, Float_t reviveTime) : TNamed(),
    fInitialMass(initialMass), fMetallicity(metallicity), fReviveTime(reviveTime)
 {
@@ -34,7 +35,7 @@ NakazatoModel::NakazatoModel(
 //______________________________________________________________________________
 //
 
-NakazatoModel::~NakazatoModel()
+NEUS::NakazatoModel::~NakazatoModel()
 {
    for (UShort_t i=0; i<7; i++) {
       if (fH2N[i]) delete fH2N[i];
@@ -50,7 +51,7 @@ NakazatoModel::~NakazatoModel()
 //______________________________________________________________________________
 //
 
-void NakazatoModel::LoadIntegratedData(const char *databaseDir)
+void NEUS::NakazatoModel::LoadIntegratedData(const char *databaseDir)
 {
    char *name = Form("%s/integ%.0f0%.0f.data",
          databaseDir, fInitialMass, fReviveTime/100);
@@ -209,7 +210,7 @@ void NakazatoModel::LoadIntegratedData(const char *databaseDir)
 //______________________________________________________________________________
 //
 
-void NakazatoModel::LoadFullData(const char *databaseDir)
+void NEUS::NakazatoModel::LoadFullData(const char *databaseDir)
 {
    char *name = Form("%s/intp%.0f0%.0f.data",
          databaseDir, fInitialMass, fReviveTime/100);
@@ -362,7 +363,7 @@ void NakazatoModel::LoadFullData(const char *databaseDir)
 //______________________________________________________________________________
 //
 
-TH2D* NakazatoModel::H2N(UShort_t type)
+TH2D* NEUS::NakazatoModel::H2N(UShort_t type)
 {
    if (type<1 || type>6) {
       Warning("H2N","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -380,7 +381,7 @@ TH2D* NakazatoModel::H2N(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH2D* NakazatoModel::H2L(UShort_t type)
+TH2D* NEUS::NakazatoModel::H2L(UShort_t type)
 {
    if (type<1 || type>6) {
       Warning("H2L","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -398,7 +399,7 @@ TH2D* NakazatoModel::H2L(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH1D* NakazatoModel::HNe(UShort_t type, Double_t tmax)
+TH1D* NEUS::NakazatoModel::HNe(UShort_t type, Double_t tmax)
 {
    if (type<1 || type>6) {
       Warning("HNe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -436,7 +437,7 @@ TH1D* NakazatoModel::HNe(UShort_t type, Double_t tmax)
 //______________________________________________________________________________
 //
 
-TH1D* NakazatoModel::HLe(UShort_t type, Double_t tmax)
+TH1D* NEUS::NakazatoModel::HLe(UShort_t type, Double_t tmax)
 {
    if (type<1 || type>6) {
       Warning("HLe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -474,7 +475,7 @@ TH1D* NakazatoModel::HLe(UShort_t type, Double_t tmax)
 //______________________________________________________________________________
 //
 
-TH1D* NakazatoModel::HNt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HNt(UShort_t type)
 {
    if (type<1 || type>6) {
       Warning("HNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -509,7 +510,7 @@ TH1D* NakazatoModel::HNt(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH1D* NakazatoModel::HLt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HLt(UShort_t type)
 {
    if (type<1 || type>6) {
       Warning("HLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
@@ -545,7 +546,7 @@ TH1D* NakazatoModel::HLt(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH1D* NakazatoModel::HEt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HEt(UShort_t type)
 {
    if (type<1 || type>6) {
       Warning("HEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");

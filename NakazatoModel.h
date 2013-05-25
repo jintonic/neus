@@ -1,9 +1,14 @@
-#ifndef NAKAZATOMODEL_HH
-#define NAKAZATOMODEL_HH
+#ifndef NAKAZATOMODEL_H
+#define NAKAZATOMODEL_H
 
-#include <TH2D.h>
+#include <TNamed.h>
 
-class NakazatoModel : public TNamed
+class TH1D;
+class TH2D;
+
+namespace NEUS { class NakazatoModel; }
+
+class NEUS::NakazatoModel : public TNamed
 {
    protected:
       TH2D *fH2N[7], *fH2L[7];
@@ -40,4 +45,4 @@ class NakazatoModel : public TNamed
       ClassDef(NakazatoModel,1);
 };
 
-#endif // NAKAZATOMODEL_HH
+#endif
