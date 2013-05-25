@@ -1,6 +1,6 @@
 neus - neutrinos from supernovae
 
-It is a C++ library providing neutrino energy and number luminosity spectra and their time evolutions.
+It is a C++ library providing neutrino energy, number luminosity spectra and their time evolutions.
 Two supernova models are included, 
 the [Nakazato model](http://asphwww.ph.noda.tus.ac.jp/snn/) and 
 the [Livermore model](http://stacks.iop.org/0004-637X/496/i=1/a=216).
@@ -23,3 +23,9 @@ can be specified in the second line of the makefile.
 copy it to ```/prefix/lib/```. 
 The header files will be copied to ```/prefix/include/NEUS/```.
 The prefix can be specified in the first line of the makefile.
+
+#####Usage
+```cpp
+#include <NEUS/NakazatoModel.h>
+using namespace NEUS;
+```
