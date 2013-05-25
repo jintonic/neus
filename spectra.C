@@ -1,5 +1,7 @@
 #include "NakazatoModel.h"
+using namespace NEUS;
 
+#include <TH2D.h>
 #include <TFile.h>
 #include <TROOT.h>
 #include <TCanvas.h>
