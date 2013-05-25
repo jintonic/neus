@@ -1,5 +1,7 @@
-# Define CXX, CXXFLAGS, SOFLAGS & LIBS
-# ====================================
+PREFIX  = $(HOME)
+TOTAL   = $(HOME)
+LIBNAME = NEUS
+LIBRARY = lib$(LIBNAME).so
 
 OPT2       = -O2
 
@@ -54,7 +56,6 @@ LIBS     = $(ROOTLIBS)
 
 ROOTCINT = rootcint
 
-LIBNAME := SNVD
 ROOTIFIED_SOURCE := $(LIBNAME)Dict.cc
 ROOTIFIED_HEADER := $(ROOTIFIED_SOURCE:.cc=.h)
 ROOTIFIED_OBJECT := $(ROOTIFIED_SOURCE:.cc=.o)
@@ -71,10 +72,9 @@ DEPFILE = $(SOURCES:.cc=.d)
 LINKDEF = LinkDef.h
 
 
-# Define LIBRARY, ROOTMAP & variables to create them
+# Define ROOTMAP & variables to create them
 # ==================================================
 
-LIBRARY = lib$(LIBNAME).so
 ROOTMAP = $(LIBRARY:.so=.rootmap)
 
 SYMBOLS = `nm -CPu $(LIBRARY) |\
