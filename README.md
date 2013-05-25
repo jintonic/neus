@@ -11,6 +11,8 @@ Since the database of Nakazato model is loaded to the
 [TH1D](http://root.cern.ch/root/html/TH1D.html) objects provided by
 [ROOT](http://root.cern.ch),
 the library has to be compiled against [ROOT](http://root.cern.ch) libraries.
+The database files have to be downloaded from http://asphwww.ph.noda.tus.ac.jp/snn/
+and extracted to the local machine.
 
 The intepolation of Livermore model is provided in 
 [jintonic/total](https://github.com/jintonic/total),
@@ -25,6 +27,8 @@ The header files will be copied to ```/prefix/include/NEUS/```.
 The prefix can be specified in the first line of the makefile.
 
 #####Usage
+The usage of classes is demonstrated in *.C files. 
+The following code snippets have to be included in the main program to use the library.
 ```cpp
 #include <NEUS/NakazatoModel.h>
 using namespace NEUS;
