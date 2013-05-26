@@ -166,6 +166,6 @@ tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
 %.exe:%.C
-	$(CXX) $< $(CXXFLAGS) $(LIBS) -L. -l$(LIBNAME) -o $@
+	$(CXX) $< $(CXXFLAGS) $(LIBS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL -o $@
 
 .PHONY: all info tags clean
