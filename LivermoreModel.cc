@@ -11,11 +11,12 @@ extern "C" {
 //______________________________________________________________________________
 //
 
-NEUS::LivermoreModel::LivermoreModel() : TNamed()
+NEUS::LivermoreModel::LivermoreModel(const char *name, const char *title) :
+   SupernovaModel(name, title)
 {
    for (UShort_t i=0; i<7; i++) {
-      f2N[i]=NULL;
-      f2L[i]=NULL;
+      fN2[i]=NULL;
+      fL2[i]=NULL;
       fNe[i]=NULL;
       fNt[i]=NULL;
       fLe[i]=NULL;
@@ -30,8 +31,8 @@ NEUS::LivermoreModel::LivermoreModel() : TNamed()
 NEUS::LivermoreModel::~LivermoreModel()
 {
    for (UShort_t i=0; i<7; i++) {
-      if (f2N[i]) delete f2N[i];
-      if (f2L[i]) delete f2L[i];
+      if (fN2[i]) delete fN2[i];
+      if (fL2[i]) delete fL2[i];
       if (fNe[i]) delete fNe[i];
       if (fNt[i]) delete fNt[i];
       if (fLe[i]) delete fLe[i];
@@ -45,7 +46,97 @@ NEUS::LivermoreModel::~LivermoreModel()
 
 void NEUS::LivermoreModel::SetDataLocation(const char *dir)
 {
+   SupernovaModel::SetDataLocation(dir);
    gSystem->Setenv("TOTAL_DATA_DIR", dir);
+}
+
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::LivermoreModel::N2(UShort_t type, Double_t energy, Double_t time)
+{
+   Double_t dNL1, dNL2, dNL3;
+   wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+
+   if (type==1) return dNL1;
+   else if (type==2) return dNL2;
+   else return dNL3;
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
+{
+   Double_t n1=0, n2=0, n3=0;
+   Double_t dNL1, dNL2, dNL3;
+
+   Double_t time = 1.2e-3; // start time [second]
+   Double_t dt = 1.e-3; // time inteval [second]
+   while (time<10) { // fine step before 10 second
+      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+      n1   += dNL1*dt;
+      n2   += dNL2*dt;
+      n3   += dNL3*dt;
+      time += dt;
+   }
+
+   Double_t tmax=17.9012; // end time [second]
+   dt = 1; // time inteval
+   while (time>=10 && time<tmax) { // coarse step after 10 second
+      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+      n1   += dNL1*dt;
+      n2   += dNL2*dt;
+      n3   += dNL3*dt;
+      time += dt;
+   }
+
+   if (type==1) return n1;
+   else if (type==2) return n2;
+   else return n3;
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::LivermoreModel::Nall(UShort_t type)
+{
+   Double_t n1=0, n2=0, n3=0;
+   Double_t dNL1, dNL2, dNL3;
+   
+   Double_t energy = 2.5; // start energy [MeV]
+   Double_t de = 1; // energy step [MeV]
+   Double_t emax=100; // max energy [MeV]
+
+   Double_t time = 1.2e-3; // start time [second]
+   Double_t dt = 1.e-3; // time inteval [second]
+   Double_t tmax=17.9012; // end time [second]
+
+   while (energy<emax) {
+      while (time<10) { // fine step before 10 second
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         n1   += dNL1*dt*de;
+         n2   += dNL2*dt*de;
+         n3   += dNL3*dt*de;
+         time += dt;
+      }
+
+      dt = 1; // time inteval
+      while (time>=10 && time<tmax) { // coarse step after 10 second
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         n1   += dNL1*dt*de;
+         n2   += dNL2*dt*de;
+         n3   += dNL3*dt*de;
+         time += dt;
+      }
+
+      energy+=de;
+   }
+
+   if (type==1) return n1;
+   else if (type==2) return n2;
+   else return n3;
 }
 
 //______________________________________________________________________________
@@ -73,23 +164,42 @@ Double_t NEUS::LivermoreModel::WilsonNe(Double_t *x, Double_t *parameter)
    Double_t Ev = x[0]; // neutrino energy [MeV]
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
    Double_t tmax = parameter[1]; // upper limit of time [second]
-   if (tmax>18.) tmax=18.;
 
    Double_t n1=0, n2=0, n3=0;
    Double_t dNL1, dNL2, dNL3;
-   Double_t time = 1.2e-3; // start time
+
+   Double_t time = 1.2e-3; // start time [second]
    Double_t dt = 1.e-3; // time inteval
-   while (time<tmax) {
-      wilson_nl_(&time, &Ev, &dNL1, &dNL2, &dNL3);
-      n1   += dNL1*dt;
-      n2   += dNL2*dt;
-      n3   += dNL3*dt;
-      time += dt;
+   if (tmax<10) {
+      while (time<=tmax) { // fine step before 10 second
+         wilson_nl_(&time, &Ev, &dNL1, &dNL2, &dNL3);
+         n1   += dNL1*dt;
+         n2   += dNL2*dt;
+         n3   += dNL3*dt;
+         time += dt;
+      }
+   } else {
+      if (tmax>17.9012) tmax=17.9012; // end time [second]
+      while (time<=10) { // fine step before 10 second
+         wilson_nl_(&time, &Ev, &dNL1, &dNL2, &dNL3);
+         n1   += dNL1*dt;
+         n2   += dNL2*dt;
+         n3   += dNL3*dt;
+         time += dt;
+      }
+      dt = 1; // time inteval
+      while (time>=10 && time<tmax) { // coarse step after 10 second
+         wilson_nl_(&time, &Ev, &dNL1, &dNL2, &dNL3);
+         n1   += dNL1*dt;
+         n2   += dNL2*dt;
+         n3   += dNL3*dt;
+         time += dt;
+      }
    }
 
-   if (type==1) return n1;
-   else if (type==2) return n2;
-   else return n3;
+   if (type==1) return n1/1e50;
+   else if (type==2) return n2/1e50;
+   else return n3/1e50;
 }
 
 //______________________________________________________________________________
@@ -114,9 +224,9 @@ Double_t NEUS::LivermoreModel::WilsonNt(Double_t *x, Double_t *parameter)
       Ev += dE;
    }
 
-   if (type==1) return n1;
-   else if (type==2) return n2;
-   else return n3;
+   if (type==1) return n1/1e50;
+   else if (type==2) return n2/1e50;
+   else return n3/1e50;
 }
 
 //______________________________________________________________________________
@@ -144,7 +254,7 @@ Double_t NEUS::LivermoreModel::WilsonLe(Double_t *x, Double_t *parameter)
    Double_t Ev = x[0]; // neutrino energy [MeV]
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
    Double_t tmax = parameter[1]; // upper limit of time [second]
-   if (tmax>18.) tmax=18.;
+   if (tmax>17.9012) tmax=17.9012;
 
    Double_t l1=0, l2=0, l3=0;
    Double_t dNL1, dNL2, dNL3;
@@ -224,45 +334,45 @@ Double_t NEUS::LivermoreModel::WilsonEt(Double_t *x, Double_t *parameter)
 //______________________________________________________________________________
 //
 
-TF2* NEUS::LivermoreModel::F2N(UShort_t type)
+TF2* NEUS::LivermoreModel::FN2(UShort_t type)
 {
    if (type<1 || type>6) {
-      Warning("F2N","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("F2N","NULL pointer is returned!");
+      Warning("FN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("FN2","NULL pointer is returned!");
       return NULL;
    }
-   if (f2N[type]) return f2N[type];
+   if (fN2[type]) return fN2[type];
 
-   f2N[type] = new TF2(Form("f2N%d",type), this, &LivermoreModel::WilsonN2,
-        1.2e-3, 17.9012, 2.5, 62.5, 1, "LivermoreModel", "F2N");
-   f2N[type]->SetParameter(0,type);
-   f2N[type]->SetNpx(179);
-   f2N[type]->SetNpy(60);
-   f2N[type]->SetMaximum(1e10);
-   f2N[type]->SetMinimum(1e-10);
-   f2N[type]->GetXaxis()->SetTitle("time [second]");
-   f2N[type]->GetYaxis()->SetTitle("neutrino energy [MeV]");
+   fN2[type] = new TF2(Form("fN2%d",type), this, &LivermoreModel::WilsonN2,
+         1.2e-3, 17.9012, 2.5, 62.5, 1, "LivermoreModel", "FN2");
+   fN2[type]->SetParameter(0,type);
+   fN2[type]->SetNpx(179);
+   fN2[type]->SetNpy(60);
+   fN2[type]->SetMaximum(1e10);
+   fN2[type]->SetMinimum(1e-10);
+   fN2[type]->GetXaxis()->SetTitle("time [second]");
+   fN2[type]->GetYaxis()->SetTitle("neutrino energy [MeV]");
    if (type==1)
-      f2N[type]->SetTitle("number of #nu_{e}/10^{50} [/second/MeV]");
-   return f2N[type];
+      fN2[type]->SetTitle("number of #nu_{e}/10^{50} [/second/MeV]");
+   return fN2[type];
 }
 
 //______________________________________________________________________________
 //
 
-TF2* NEUS::LivermoreModel::F2L(UShort_t type)
+TF2* NEUS::LivermoreModel::FL2(UShort_t type)
 {
    if (type<1 || type>6) {
-      Warning("F2L","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("F2L","NULL pointer is returned!");
+      Warning("FL2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("FL2","NULL pointer is returned!");
       return NULL;
    }
-   if (f2L[type]) return f2L[type];
+   if (fL2[type]) return fL2[type];
 
-   f2L[type] = new TF2(Form("f2L%d",type), this, &LivermoreModel::WilsonL2,
-        1.2e-3, 18, 2.5, 100, 1, "LivermoreModel", "F2L");
-   f2L[type]->SetParameter(0,type);
-   return f2L[type];
+   fL2[type] = new TF2(Form("fL2%d",type), this, &LivermoreModel::WilsonL2,
+         1.2e-3, 18, 2.5, 100, 1, "LivermoreModel", "FL2");
+   fL2[type]->SetParameter(0,type);
+   return fL2[type];
 }
 
 //______________________________________________________________________________
@@ -278,7 +388,7 @@ TF1* NEUS::LivermoreModel::FNe(UShort_t type, Double_t tmax)
    if (fNe[type]) return fNe[type];
 
    fNe[type] = new TF1(Form("fNe%d",type), this, &LivermoreModel::WilsonNe,
-        2.5, 100, 2, "LivermoreModel", "FNe");
+         2.5, 100, 2, "LivermoreModel", "FNe");
    fNe[type]->SetParameter(0,type);
    fNe[type]->SetParameter(1,tmax);
 
@@ -298,7 +408,7 @@ TF1* NEUS::LivermoreModel::FLe(UShort_t type, Double_t tmax)
    if (fLe[type]) return fLe[type];
 
    fLe[type] = new TF1(Form("fLe%d",type), this, &LivermoreModel::WilsonLe,
-        2.5, 100, 2, "LivermoreModel", "FLe");
+         2.5, 100, 2, "LivermoreModel", "FLe");
    fLe[type]->SetParameter(0,type);
    fLe[type]->SetParameter(1,tmax);
 
@@ -318,7 +428,7 @@ TF1* NEUS::LivermoreModel::FNt(UShort_t type, Double_t maxEv)
    if (fNt[type]) return fNt[type];
 
    fNt[type] = new TF1(Form("fNt%d",type), this, &LivermoreModel::WilsonNt,
-        1.2e-3, 18., 2, "LivermoreModel", "FNt");
+         1.2e-3, 18., 2, "LivermoreModel", "FNt");
    fNt[type]->SetParameter(0,type);
    fNt[type]->SetParameter(1,maxEv);
 
@@ -338,7 +448,7 @@ TF1* NEUS::LivermoreModel::FLt(UShort_t type, Double_t maxEv)
    if (fLt[type]) return fLt[type];
 
    fLt[type] = new TF1(Form("fLt%d",type), this, &LivermoreModel::WilsonLt,
-        1.2e-3, 18., 2, "LivermoreModel", "FLt");
+         1.2e-3, 18., 2, "LivermoreModel", "FLt");
    fLt[type]->SetParameter(0,type);
    fLt[type]->SetParameter(1,maxEv);
 
@@ -358,7 +468,7 @@ TF1* NEUS::LivermoreModel::FEt(UShort_t type, Double_t maxEv)
    if (fEt[type]) return fEt[type];
 
    fEt[type] = new TF1(Form("fEt%d",type), this, &LivermoreModel::WilsonEt,
-        1.2e-3, 18., 2, "LivermoreModel", "FEt");
+         1.2e-3, 18., 2, "LivermoreModel", "FEt");
    fEt[type]->SetParameter(0,type);
    fEt[type]->SetParameter(1,maxEv);
 
@@ -368,9 +478,9 @@ TF1* NEUS::LivermoreModel::FEt(UShort_t type, Double_t maxEv)
 //______________________________________________________________________________
 //
 
-TH2D* NEUS::LivermoreModel::H2N(UShort_t type)
+TH2D* NEUS::LivermoreModel::HN2(UShort_t type)
 {
-   return (TH2D*) F2N(type)->GetHistogram();
+   return (TH2D*) FN2(type)->GetHistogram();
 }
 
 //______________________________________________________________________________
@@ -392,9 +502,9 @@ TH1D* NEUS::LivermoreModel::HNt(UShort_t type, Double_t maxEv)
 //______________________________________________________________________________
 //
 
-TH2D* NEUS::LivermoreModel::H2L(UShort_t type)
+TH2D* NEUS::LivermoreModel::HL2(UShort_t type)
 {
-   return (TH2D*) F2L(type)->GetHistogram();
+   return (TH2D*) FL2(type)->GetHistogram();
 }
 
 //______________________________________________________________________________
