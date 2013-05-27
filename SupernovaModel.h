@@ -23,6 +23,7 @@ class NEUS::SupernovaModel : public TNamed
 
       virtual Double_t N2(UShort_t type, Double_t energy, Double_t time);
       virtual Double_t Ne(UShort_t type, Double_t energy) { return 0; }
+      virtual Double_t Nall(UShort_t type) { return 0; }
 
       virtual TH2D* HN2(UShort_t type=1); // N(E, t)
       virtual TH1D* HNt(UShort_t type=1, Double_t maxEv=100/*MeV*/); // N(t)
