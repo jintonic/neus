@@ -71,6 +71,8 @@ DEPFILE = $(SOURCES:.cc=.d)
 
 LINKDEF = LinkDef.h
 
+SRCS = livermore.C nakazato.C
+EXES = $(SRCS:.C=.exe)
 
 # Define ROOTMAP & variables to create them
 # ==================================================
@@ -97,7 +99,7 @@ RLIBMAP = rlibmap
 # the first target is the default target, it depends on $(ROOTMAP)
 # before "make all", make will include all other makefiles specified
 # by the include command
-all: $(ROOTMAP)
+all: $(ROOTMAP) $(EXES)
 	@echo
 	@echo "* Done!"
 	@echo 
@@ -123,6 +125,8 @@ $(ROOTMAP): $(LIBRARY)
 	@echo
 	@echo "* Creating rootmap file:"
 	$(RLIBMAP) -o $(ROOTMAP) -l $(LIBRARY) -d $(DEPENDS) -c $(LINKDEF)
+	@echo
+	@echo "* Creating executables:"
 
 # lib$(LIBNAME).so depends on all *.o files.
 #  The flag "-shared" is used to create shared libs
@@ -160,12 +164,12 @@ info:
 	@echo
 
 clean:
-	$(RM) *.o *.d *.d.* *~ *Dict* $(ROOTMAP) $(LIBRARY)
+	$(RM) *.exe *.o *.d *.d.* *~ *Dict* $(ROOTMAP) $(LIBRARY)
 
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
-%.exe:%.C
+$(EXES):%.exe:%.C
 	$(CXX) $< $(CXXFLAGS) $(LIBS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL -o $@
 
 .PHONY: all info tags clean
