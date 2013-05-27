@@ -18,7 +18,7 @@ class NEUS::SupernovaModel : public TNamed
       SupernovaModel(const char *name, const char *title);
       virtual ~SupernovaModel() {};
 
-      void SetDataLocation(const char *dir) { fDataLocation=dir; }
+      virtual void SetDataLocation(const char *dir) { fDataLocation=dir; }
       const char* DataLocation() { return fDataLocation; }
 
       virtual Double_t N2(UShort_t type, Double_t energy, Double_t time);
