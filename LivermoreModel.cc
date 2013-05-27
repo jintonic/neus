@@ -73,7 +73,7 @@ Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
    Double_t dNL1, dNL2, dNL3;
 
    Double_t time = 1.2e-3; // start time [second]
-   Double_t dt = 1.e-3; // time inteval [second]
+   Double_t dt = 1.e-3; // time interval [second]
    while (time<10) { // fine step before 10 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       n1   += dNL1*dt;
@@ -83,7 +83,7 @@ Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
    }
 
    Double_t tmax=17.9012; // end time [second]
-   dt = 1; // time inteval
+   dt = 1; // time interval
    while (time>=10 && time<tmax) { // coarse step after 10 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       n1   += dNL1*dt;
@@ -100,38 +100,93 @@ Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
 //______________________________________________________________________________
 //
 
+Double_t NEUS::LivermoreModel::Nt(UShort_t type, Double_t time)
+{
+   Double_t n1=0, n2=0, n3=0;
+   Double_t dNL1, dNL2, dNL3;
+
+   Double_t energy = 2.5; // start energy [MeV]
+   Double_t de = 2; // energy step [MeV]
+   Double_t emax=80; // max energy [MeV]
+
+   while (energy<emax) {
+      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+      n1 += dNL1*de;
+      n2 += dNL2*de;
+      n3 += dNL3*de;
+      energy+=de;
+   }
+   if (type==1) return n1;
+   else if (type==2) return n2;
+   else return n3;
+}
+
+//______________________________________________________________________________
+//
+
 Double_t NEUS::LivermoreModel::Nall(UShort_t type)
 {
    Double_t n1=0, n2=0, n3=0;
    Double_t dNL1, dNL2, dNL3;
-   
+
    Double_t energy = 2.5; // start energy [MeV]
-   Double_t de = 1; // energy step [MeV]
-   Double_t emax=100; // max energy [MeV]
+   Double_t de = 2; // energy step [MeV]
+   Double_t emax=80; // max energy [MeV]
 
    Double_t time = 1.2e-3; // start time [second]
-   Double_t dt = 1.e-3; // time inteval [second]
+   Double_t dt = 1.e-3; // time interval [second]
    Double_t tmax=17.9012; // end time [second]
 
-   while (energy<emax) {
-      while (time<10) { // fine step before 10 second
+   while (time<.1) { // fine step before 1 second
+      dt = 1.e-3;
+      energy = 2.5;
+      while (energy<emax) {
          wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         n1   += dNL1*dt*de;
-         n2   += dNL2*dt*de;
-         n3   += dNL3*dt*de;
-         time += dt;
+         n1 += dNL1*dt*de;
+         n2 += dNL2*dt*de;
+         n3 += dNL3*dt*de;
+         energy+=de;
       }
+      time += dt;
+   }
 
-      dt = 1; // time inteval
-      while (time>=10 && time<tmax) { // coarse step after 10 second
+   while (time>=.1 && time<1) {
+      dt = 1.e-2;
+      energy = 2.5;
+      while (energy<emax) {
          wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         n1   += dNL1*dt*de;
-         n2   += dNL2*dt*de;
-         n3   += dNL3*dt*de;
-         time += dt;
+         n1 += dNL1*dt*de;
+         n2 += dNL2*dt*de;
+         n3 += dNL3*dt*de;
+         energy+=de;
       }
+      time += dt;
+   }
 
-      energy+=de;
+   while (time>=1 && time<10) {
+      dt = 1.e-1;
+      energy = 2.5;
+      while (energy<emax) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         n1 += dNL1*dt*de;
+         n2 += dNL2*dt*de;
+         n3 += dNL3*dt*de;
+         energy+=de;
+      }
+      time += dt;
+   }
+
+   while (time>=10 && time<tmax) { // coarse step after 10 second
+      dt = 1; // time interval
+      energy = 2.5;
+      while (energy<emax) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         n1 += dNL1*dt*de;
+         n2 += dNL2*dt*de;
+         n3 += dNL3*dt*de;
+         energy+=de;
+      }
+      time += dt;
    }
 
    if (type==1) return n1;
@@ -531,3 +586,11 @@ TH1D* NEUS::LivermoreModel::HEt(UShort_t type)
    return (TH1D*) FEt(type)->GetHistogram();
 }
 
+//______________________________________________________________________________
+//
+
+void NEUS::LivermoreModel::Print()
+{
+   Printf("20 Solar mass, Livermore:     n1=%1.2e, n2=%1.2e, nx=%1.2e, total=%1.2e",
+         Nall(1), Nall(2), Nall(3), Nall(1) + Nall(2) + Nall(3)*4);
+}

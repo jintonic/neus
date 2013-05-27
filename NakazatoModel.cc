@@ -14,6 +14,8 @@ NEUS::NakazatoModel::NakazatoModel(
    SupernovaModel(), fInitialMass(initialMass), 
    fMetallicity(metallicity), fReviveTime(reviveTime)
 {
+   if (initialMass==30 && metallicity<0.01) fReviveTime=0;
+
    if (metallicity>0.02-0.01) {
       fName = Form("model%.0f0%.0f",fInitialMass,fReviveTime/100);
       fTitle = Form("%.0f Solar mass, 0.02, %.0f ms",fInitialMass,fReviveTime);
@@ -54,11 +56,9 @@ NEUS::NakazatoModel::~NakazatoModel()
 
 void NEUS::NakazatoModel::LoadIntegratedData()
 {
-   if (fInitialMass==30. && fMetallicity==0.004) fReviveTime=0;
-
    char *name = Form("%s/integdata/integ%.0f0%.0f.data",
          fDataLocation.Data(), fInitialMass, fReviveTime/100);
-   if (fMetallicity==0.004)
+   if (fMetallicity<0.01)
       name = Form("%s/integdata/integ%.0f1%.0f.data",
             fDataLocation.Data(), fInitialMass, fReviveTime/100);
 
@@ -215,7 +215,7 @@ void NEUS::NakazatoModel::LoadIntegratedData()
 
 void NEUS::NakazatoModel::LoadFullData()
 {
-   if (fInitialMass==30. && fMetallicity==0.004) {
+   if (fInitialMass==30. && fMetallicity<0.01) {
       Warning("LoadFullData", "No full data for black hole");
       Warning("LoadFullData", "with inital mass = 30 Solar mass,");
       Warning("LoadFullData", "and metallicity of 0.004.");
@@ -224,7 +224,7 @@ void NEUS::NakazatoModel::LoadFullData()
 
    char *name = Form("%s/intpdata/intp%.0f0%.0f.data",
          fDataLocation.Data(), fInitialMass, fReviveTime/100);
-   if (fMetallicity==0.004)
+   if (fMetallicity<0.01)
       name = Form("%s/intpdata/intp%.0f1%.0f.data",
             fDataLocation.Data(), fInitialMass, fReviveTime/100);
 
@@ -389,12 +389,27 @@ Double_t NEUS::NakazatoModel::Ne(UShort_t type, Double_t energy)
 //______________________________________________________________________________
 //
 
+Double_t NEUS::NakazatoModel::Nt(UShort_t type, Double_t time)
+{
+   if (time>20) time=20;
+
+   // look for the right bin in time axis
+   Double_t t=-5e-2;
+   Int_t ibin=0;
+   while (t<time) {
+      ibin++;
+      t += HNt(type)->GetBinContent(ibin);
+   }
+
+   return HNt(type)->Integral("width");
+}
+
+//______________________________________________________________________________
+//
+
 Double_t NEUS::NakazatoModel::Nall(UShort_t type)
 {
-   Double_t ntot=0;
-   for (UShort_t i=1; i<=HNe(type)->GetNbinsX(); i++)
-      ntot += HNe(type)->GetBinContent(i) * HNe(type)->GetBinWidth(i);
-   return ntot;
+   return HNe(type)->Integral("width");
 }
 
 //______________________________________________________________________________
@@ -623,3 +638,9 @@ TH1D* NEUS::NakazatoModel::HEt(UShort_t type)
 //______________________________________________________________________________
 //
 
+void NEUS::NakazatoModel::Print()
+{
+   Printf("%2.0f Solar mass, %.3f, %3.0f ms: n1=%1.2e, n2=%1.2e, nx=%1.2e, total=%1.2e",
+         fInitialMass, fMetallicity, fReviveTime, Nall(1), Nall(2), Nall(3),
+         Nall(1) + Nall(2) + Nall(3)*4);
+}

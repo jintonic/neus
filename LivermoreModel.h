@@ -33,6 +33,7 @@ class NEUS::LivermoreModel : public SupernovaModel
 
       Double_t N2(UShort_t type, Double_t energy, Double_t time);
       Double_t Ne(UShort_t type, Double_t energy);
+      Double_t Nt(UShort_t type, Double_t time);
       Double_t Nall(UShort_t type);
 
       TH2D* HN2(UShort_t type=1); // N(E, t)
@@ -54,6 +55,8 @@ class NEUS::LivermoreModel : public SupernovaModel
       TF1* FLe(UShort_t type=1, Double_t tmax=18/*second*/); // L(E)
 
       TF1* FEt(UShort_t type=1, Double_t maxEv=100/*MeV*/); // <E>(t)
+
+      void Print();
 
       ClassDef(LivermoreModel,1);
 };

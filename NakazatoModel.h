@@ -31,6 +31,7 @@ class NEUS::NakazatoModel : public SupernovaModel
 
       Double_t N2(UShort_t type, Double_t energy, Double_t time);
       Double_t Ne(UShort_t type, Double_t energy);
+      Double_t Nt(UShort_t type, Double_t time);
       Double_t Nall(UShort_t type);
 
       TH2D* HN2(UShort_t type=1); // N(E, t)
@@ -42,6 +43,8 @@ class NEUS::NakazatoModel : public SupernovaModel
       TH1D* HLe(UShort_t type=1, Double_t tmax=0); // L(E)
 
       TH1D* HEt(UShort_t type=1); // <E>(t)
+
+      void Print();
 
       ClassDef(NakazatoModel,1);
 };
