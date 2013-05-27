@@ -21,8 +21,9 @@ class NEUS::SupernovaModel : public TNamed
       virtual void SetDataLocation(const char *dir) { fDataLocation=dir; }
       const char* DataLocation() { return fDataLocation; }
 
-      virtual Double_t N2(UShort_t type, Double_t energy, Double_t time);
-      virtual Double_t Ne(UShort_t type, Double_t energy) { return 0; }
+      virtual Double_t N2(UShort_t type/*1:v_e, 2: anti-v_e, 3, 4, 5, 6: v_x*/,
+            Double_t energy/*MeV*/, Double_t time/*second*/);
+      virtual Double_t Ne(UShort_t type, Double_t energy/*MeV*/) { return 0; }
       virtual Double_t Nall(UShort_t type) { return 0; }
 
       virtual TH2D* HN2(UShort_t type=1); // N(E, t)
