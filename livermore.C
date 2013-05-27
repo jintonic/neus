@@ -31,13 +31,9 @@ int main()
    TCanvas *can = new TCanvas;
    can->Print("livermore.ps[");
 
-   Double_t x[2]={17.+1.2e-3,102.5};
-   Double_t p[1]={1};
    can->SetLogz();
-   //cout<<sn->F2N(1)->Eval(1.,20.)<<endl;
-   sn->F2N(1)->Draw("colz");
+   sn->FN2(1)->Draw("colz");
    can->Print("livermore.ps");
-   cout<<sn->WilsonN2(x,p)<<endl;
 
    //TH1D *hNe1 = sn->HNe(1);
    //TH1D *hNe2 = sn->HNe(2);
