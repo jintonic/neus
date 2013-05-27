@@ -54,6 +54,8 @@ NEUS::NakazatoModel::~NakazatoModel()
 
 void NEUS::NakazatoModel::LoadIntegratedData()
 {
+   if (fInitialMass==30. && fMetallicity==0.004) fReviveTime=0;
+
    char *name = Form("%s/integdata/integ%.0f0%.0f.data",
          fDataLocation.Data(), fInitialMass, fReviveTime/100);
    if (fMetallicity==0.004)
@@ -213,6 +215,13 @@ void NEUS::NakazatoModel::LoadIntegratedData()
 
 void NEUS::NakazatoModel::LoadFullData()
 {
+   if (fInitialMass==30. && fMetallicity==0.004) {
+      Warning("LoadFullData", "No full data for black hole");
+      Warning("LoadFullData", "with inital mass = 30 Solar mass,");
+      Warning("LoadFullData", "and metallicity of 0.004.");
+      return;
+   }
+
    char *name = Form("%s/intpdata/intp%.0f0%.0f.data",
          fDataLocation.Data(), fInitialMass, fReviveTime/100);
    if (fMetallicity==0.004)
