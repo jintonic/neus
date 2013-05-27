@@ -71,7 +71,7 @@ DEPFILE = $(SOURCES:.cc=.d)
 
 LINKDEF = LinkDef.h
 
-SRCS = livermore.C nakazato.C
+SRCS = $(wildcard *.C)
 EXES = $(SRCS:.C=.exe)
 
 # Define ROOTMAP & variables to create them
@@ -170,6 +170,6 @@ tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
 $(EXES):%.exe:%.C
-	$(CXX) $< $(CXXFLAGS) $(LIBS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL -o $@
+	$(CXX) $< $(CXXFLAGS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL $(LIBS) -o $@
 
 .PHONY: all info tags clean
