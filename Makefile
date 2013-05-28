@@ -169,7 +169,47 @@ clean:
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
+install:
+	@echo "PREFIX=$(PREFIX)"
+	@echo -n "checking if $(PREFIX) exists..."
+	@if [ -d $(PREFIX) ]; then \
+	  echo "yes."; \
+	else \
+	  echo "no."; \
+	  echo "mkdir $(PREFIX)..."; \
+	  mkdir $(PREFIX); \
+	fi
+	@echo -n "copying lib$(LIBNAME).so to $(PREFIX)/lib..."
+	@if [ -d $(PREFIX)/lib ]; then \
+	  cp lib$(LIBNAME).so $(PREFIX)/lib; \
+	  cp lib$(LIBNAME).rootmap $(PREFIX)/lib; \
+	else \
+	  mkdir $(PREFIX)/lib; \
+	  cp lib$(LIBNAME).so $(PREFIX)/lib; \
+	  cp lib$(LIBNAME).rootmap $(PREFIX)/lib; \
+	fi; 
+	@echo "done."; 
+	@echo -n "copying *.h to $(PREFIX)/include/$(LIBNAME)..."
+	@if [ -d $(PREFIX)/include ]; then \
+	  if [ -d $(PREFIX)/include/$(LIBNAME) ]; then \
+	    cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
+	  else \
+	    mkdir $(PREFIX)/include/$(LIBNAME); \
+	    cp $(HEADERS) $(PREFIX)/include/$(LIBNAME); \
+	  fi; \
+	else \
+	  mkdir $(PREFIX)/include; \
+	  mkdir -p $(PREFIX)/include/$(LIBNAME); \
+	  cp *.h $(PREFIX)/include/$(LIBNAME); \
+	fi
+	@echo "done."
+
+uninstall:
+	$(RM) -r $(PREFIX)/include/$(LIBNAME)
+	$(RM) -r $(PREFIX)/lib/lib$(LIBNAME).so
+
+
 $(EXES):%.exe:%.C
 	$(CXX) $< $(CXXFLAGS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL $(LIBS) -o $@
 
-.PHONY: all info tags clean
+.PHONY: all info tags clean install uninstall
