@@ -73,8 +73,10 @@ Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
    Double_t dNL1, dNL2, dNL3;
 
    Double_t time = 1.2e-3; // start time [second]
+   Double_t tmax=17.9012; // end time [second]
+
    Double_t dt = 1.e-3; // time interval [second]
-   while (time<10) { // fine step before 10 second
+   while (time<0.1) { // fine step before 0.1 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       n1   += dNL1*dt;
       n2   += dNL2*dt;
@@ -82,8 +84,25 @@ Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
       time += dt;
    }
 
-   Double_t tmax=17.9012; // end time [second]
-   dt = 1; // time interval
+   dt = 1.e-2;
+   while (time>=0.1 && time<1) {
+      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+      n1   += dNL1*dt;
+      n2   += dNL2*dt;
+      n3   += dNL3*dt;
+      time += dt;
+   }
+
+   dt = 1.e-1;
+   while (time>=1 && time<10) {
+      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+      n1   += dNL1*dt;
+      n2   += dNL2*dt;
+      n3   += dNL3*dt;
+      time += dt;
+   }
+
+   dt = 1.;
    while (time>=10 && time<tmax) { // coarse step after 10 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       n1   += dNL1*dt;
@@ -137,7 +156,7 @@ Double_t NEUS::LivermoreModel::Nall(UShort_t type)
    Double_t dt = 1.e-3; // time interval [second]
    Double_t tmax=17.9012; // end time [second]
 
-   while (time<.1) { // fine step before 1 second
+   while (time<0.1) { // fine step before 0.1 second
       dt = 1.e-3;
       energy = 2.5;
       while (energy<emax) {
@@ -150,7 +169,7 @@ Double_t NEUS::LivermoreModel::Nall(UShort_t type)
       time += dt;
    }
 
-   while (time>=.1 && time<1) {
+   while (time>=0.1 && time<1) {
       dt = 1.e-2;
       energy = 2.5;
       while (energy<emax) {
