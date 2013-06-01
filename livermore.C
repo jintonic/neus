@@ -15,19 +15,9 @@ using namespace std;
 int main()
 {
    LivermoreModel *sn = new LivermoreModel;
-   sn->SetDataLocation("/home/jingliu/total");
+   sn->SetDataLocation("../total");
 
    // draw spectra
-   const Int_t nRGBs = 5;
-   const Int_t nContours = 255;
-
-   Double_t stops[nRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
-   Double_t red[nRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
-   Double_t green[nRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
-   Double_t blue[nRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
-   TColor::CreateGradientColorTable(nRGBs,stops,red,green,blue,nContours);
-   gStyle->SetNumberContours(nContours);
-
    TCanvas *can = new TCanvas;
    can->Print("livermore.ps[");
 
@@ -35,103 +25,89 @@ int main()
    sn->FN2(1)->Draw("colz");
    can->Print("livermore.ps");
 
-   //TH1D *hNe1 = sn->HNe(1);
-   //TH1D *hNe2 = sn->HNe(2);
-   //TH1D *hNex = sn->HNe(3);
+   // N(E) in 18 second
+   TF1 *fNe1 = sn->FNe(1);
+   TF1 *fNe2 = sn->FNe(2);
+   TF1 *fNex = sn->FNe(3);
 
-   //hNe1->GetXaxis()->SetRangeUser(0,40);
-   //hNe1->GetYaxis()->SetRangeUser(0,4.8e56);
-   //hNe1->SetTitle(sn->GetTitle());
-   //hNe1->Draw();
-   //hNe2->Draw("same");
-   //hNex->Scale(4);
-   //hNex->Draw("same");
+   can->SetLogy();
+   fNe1->GetXaxis()->SetRangeUser(0,60);
+   fNe1->GetYaxis()->SetRangeUser(1e3,1e7);
+   fNe1->GetYaxis()->SetTitle("number of neutrino [10^{50}/MeV]");
+   fNe1->Draw();
+   fNe2->Draw("same");
+   fNex->Draw("same");
 
-   //TLegend *leg = new TLegend(0.45,0.60,0.88,0.88);
-   //leg->SetFillColor(0);
-   //leg->SetBorderSize(0);
-   //leg->SetHeader("total number of #nu within 18 second:");
-   //leg->AddEntry(hNe1, Form("#nu_{e}: %.1e",hNe1->Integral()),"l");
-   //leg->AddEntry(hNe2,Form("#bar{#nu}_{e}: %.1e",hNe2->Integral()),"l");
-   //leg->AddEntry(hNex, Form("#nu_{x}: %.1e",hNex->Integral()*4),"l");
-   //leg->Draw();
+   sn->FNeFD(1)->Draw("same");
+   sn->FNeFD(2)->Draw("same");
+   sn->FNeFD(3)->Draw("same");
 
-   //can->Print("livermore.ps");
+   TLegend *leg = new TLegend(0.5,0.60,0.88,0.88);
+   leg->SetFillColor(0);
+   leg->SetBorderSize(0);
+   leg->SetHeader("total number of #nu within 18 second:");
+   leg->AddEntry(fNe1, Form("#nu_{e}: %.1e",sn->Nall(1)*1e50),"l");
+   leg->AddEntry(fNe2,Form("#bar{#nu}_{e}: %.1e",sn->Nall(2)*1e50),"l");
+   leg->AddEntry(fNex, Form("#nu_{x}: %.1e",sn->Nall(3)*1e50),"l");
+   leg->Draw();
 
-   //Double_t tmax=18;/*second*/
-   //hNe1 = sn->HNe(1, tmax);
-   //hNe2 = sn->HNe(2, tmax);
-   //hNex = sn->HNe(3, tmax);
+   can->Print("livermore.ps");
 
-   //hNe1->GetXaxis()->SetRangeUser(0,40);
-   //hNe1->GetYaxis()->SetRangeUser(0,4.8e56);
-   //hNe1->SetTitle(sn->GetTitle());
-   //hNe1->Draw();
-   //hNe2->Draw("same");
-   //hNex->Scale(4);
-   //hNex->Draw("same");
+   // <E>(t)
+   can->SetLogy(0);
+   TF1 *fEt1 = sn->FEt(1);
+   TF1 *fEt2 = sn->FEt(2);
+   TF1 *fEt3 = sn->FEt(3);
 
-   //leg->Clear();
-   //leg->SetHeader(Form("total number of #nu within %.0f second:",tmax));
-   //leg->AddEntry(hNe1, Form("#nu_{e}: %.1e",hNe1->Integral()),"l");
-   //leg->AddEntry(hNe2,Form("#bar{#nu}_{e}: %.1e",hNe2->Integral()),"l");
-   //leg->AddEntry(hNex, Form("#nu_{x}: %.1e",hNex->Integral()*4),"l");
-   //leg->Draw();
+   fEt1->GetXaxis()->SetRangeUser(0.,1.5);
+   fEt1->GetYaxis()->SetRangeUser(5,30);
+   fEt1->Draw();
+   fEt2->Draw("same");
+   fEt3->Draw("same");
 
-   //can->Print("livermore.ps");
+   leg->Clear();
+   leg->SetHeader("");
+   leg->SetX1NDC(0.6);
+   leg->AddEntry(fNe1, "#nu_{e}");
+   leg->AddEntry(fNe2, "#bar{#nu}_{e}");
+   leg->AddEntry(fNex, "#nu_{x}");
+   leg->Draw();
+   can->Print("livermore.ps");
 
-   //TH1D *hEt1 = sn->HEt(1);
-   //TH1D *hEt2 = sn->HEt(2);
-   //TH1D *hEt3 = sn->HEt(3);
+   can->SetLogx();
+   fEt1->GetXaxis()->SetRangeUser(3e-2,17);
+   fEt1->GetYaxis()->SetRangeUser(5,30);
+   fEt1->Draw();
+   fEt2->Draw("same");
+   fEt3->Draw("same");
 
-   //hEt1->GetXaxis()->SetRangeUser(-0.05,0.55);
-   //hEt1->GetYaxis()->SetRangeUser(0,25);
-   //hEt1->SetTitle(sn->GetTitle());
-   //hEt1->Draw();
-   //hEt2->Draw("same");
-   //hEt3->Draw("same");
+   leg->Draw();
+   can->Print("livermore.ps");
 
-   //leg->Clear();
-   //leg->SetHeader("");
-   //leg->SetX1NDC(0.6);
-   //leg->AddEntry(hNe1, "#nu_{e}");
-   //leg->AddEntry(hNe2, "#bar{#nu}_{e}");
-   //leg->AddEntry(hNex, "#nu_{x}");
-   //leg->Draw();
-   //can->Print("livermore.ps");
+   // L(t)
+   can->SetLogy();
+   TF1 *fLt1 = sn->FLt(1);
+   TF1 *fLt2 = sn->FLt(2);
+   TF1 *fLt3 = sn->FLt(3);
 
-   //hEt1->GetXaxis()->SetRangeUser(0,20);
-   //hEt1->GetYaxis()->SetRangeUser(5,20);
-   //hEt1->Draw();
-   //hEt2->Draw("same");
-   //hEt3->Draw("same");
+   fLt1->GetXaxis()->SetRangeUser(1.2e-3,0.55);
+   //fLt1->GetYaxis()->SetRangeUser(1e50,3e53);
+   fLt1->SetTitle(sn->GetTitle());
+   fLt1->Draw();
+   fLt2->Draw("same");
+   fLt3->Draw("same");
 
-   //leg->Draw();
-   //can->Print("livermore.ps");
+   leg->Draw();
+   can->Print("livermore.ps");
 
-   //can->SetLogy();
-   //TH1D *hLt1 = sn->HLt(1);
-   //TH1D *hLt2 = sn->HLt(2);
-   //TH1D *hLt3 = sn->HLt(3);
+   fLt1->GetXaxis()->SetRangeUser(1.2e-3,18.);
+   //fLt1->GetYaxis()->SetRangeUser(1e50,1e52);
+   fLt1->Draw();
+   fLt2->Draw("same");
+   fLt3->Draw("same");
 
-   //hLt1->GetXaxis()->SetRangeUser(-0.5,0.55);
-   //hLt1->GetYaxis()->SetRangeUser(1e50,3e53);
-   //hLt1->SetTitle(sn->GetTitle());
-   //hLt1->Draw();
-   //hLt2->Draw("same");
-   //hLt3->Draw("same");
-
-   //leg->Draw();
-   //can->Print("livermore.ps");
-
-   //hLt1->GetXaxis()->SetRangeUser(0.,20.);
-   //hLt1->GetYaxis()->SetRangeUser(1e50,1e52);
-   //hLt1->Draw();
-   //hLt2->Draw("same");
-   //hLt3->Draw("same");
-
-   //leg->Draw();
-   //can->Print("livermore.ps");
+   leg->Draw();
+   can->Print("livermore.ps");
 
    can->Print("livermore.ps]");
 }
