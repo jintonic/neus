@@ -1,17 +1,110 @@
 #include "SupernovaModel.h"
 
-NEUS::SupernovaModel::SupernovaModel(const char *name, const char *title)
-   : TNamed(name, title), fDataLocation() {};
+#include <TF1.h>
+#include <TAxis.h>
 
-Double_t NEUS::SupernovaModel::N2(UShort_t type, Double_t energy, Double_t time)
-{ return 0.; }
+#include <cmath>
+using namespace std;
 
-TH2D* NEUS::SupernovaModel::HN2(UShort_t type) { return 0; }
-TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t maxEv) { return 0; }
-TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax) { return 0; }
+//______________________________________________________________________________
+//
 
-TH2D* NEUS::SupernovaModel::HL2(UShort_t type) { return 0; }
-TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t maxEv) { return 0; }
-TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax) { return 0; }
+NEUS::SupernovaModel::SupernovaModel() : TNamed(), fDataLocation(),
+   fMinE(0), fMaxE(0), fMinT(0), fMaxT(0)
+{
+   for (UShort_t i=0; i<fgNtype; i++) {
+      fTotalN[i] = 0;
+      fAverageE[i] = 1.0;
+      fNeFD[i] = NULL;
+   }
+}
 
-TH1D* NEUS::SupernovaModel::HEt(UShort_t type) { return 0; }
+//______________________________________________________________________________
+//
+
+NEUS::SupernovaModel::SupernovaModel(const char *name, const char *title) : 
+   TNamed(name, title), fDataLocation(),
+   fMinE(0), fMaxE(0), fMinT(0), fMaxT(0)
+{
+   for (UShort_t i=0; i<fgNtype; i++) {
+      fTotalN[i] = 0;
+      fAverageE[i] = 1;
+      fNeFD[i] = NULL;
+   }
+}
+
+//______________________________________________________________________________
+//
+
+NEUS::SupernovaModel::~SupernovaModel()
+{
+   for (UShort_t i=0; i<fgNtype; i++) if (fNeFD[i]) delete fNeFD[i];
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::NeFD(UShort_t type, Double_t energy)
+{
+   if (type<1 || type>6) {
+      Warning("NeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("NeFD","0 is returned!");
+      return 0;
+   }
+   Double_t c = 0.55 * Nall(type);
+   Double_t t = Eave(type)/3.;
+   return c/t/t/t * energy*energy/(1.+exp(energy/t));
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::NeFermiDirac(Double_t *x, Double_t *parameter)
+{
+   Double_t energy = x[0];
+   UShort_t type = static_cast<UShort_t>(parameter[0]);
+   return NeFD(type, energy);
+}
+
+//______________________________________________________________________________
+//
+
+TF1* NEUS::SupernovaModel::FNeFD(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HNeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HNeFD","NULL pointer is returned!");
+      return NULL;
+   }
+   if (fNeFD[type]) return fNeFD[type];
+
+   fNeFD[type] = new TF1(Form("fNeFD%d",type), this, 
+         &SupernovaModel::NeFermiDirac,
+         fMinE, fMaxE, 1, "SupernovaModel", "HNeFD");
+   fNeFD[type]->SetParameter(0,type);
+
+   fNeFD[type]->GetXaxis()->SetTitle("neutrino energy [MeV]");
+   if (type==1) {
+      fNeFD[type]->GetYaxis()->SetTitle("number of #nu_{e} [10^{50}/second]");
+      fNeFD[type]->SetLineColor(kBlack);
+      fNeFD[type]->SetLineStyle(kDashed);
+   } else if (type==2) {
+      fNeFD[type]->GetYaxis()
+         ->SetTitle("number of #bar{#nu}_{e} [10^{50}/second]");
+      fNeFD[type]->SetLineColor(kRed);
+      fNeFD[type]->SetLineStyle(kDashed);
+   } else {
+      fNeFD[type]->GetYaxis()->SetTitle("number of #nu_{x} [10^{50}/second]");
+      fNeFD[type]->SetLineColor(kBlue);
+      fNeFD[type]->SetLineStyle(kDashed);
+   }
+   return fNeFD[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HNeFD(UShort_t type)
+{
+   return (TH1D*) FNeFD(type)->GetHistogram();
+}
