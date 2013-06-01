@@ -33,3 +33,5 @@ The following code snippets have to be included in the main program to use the l
 #include <NEUS/NakazatoModel.h>
 using namespace NEUS;
 ```
+
+All output values are divided by 1e50 to move them to a range that TH2 can handle.
