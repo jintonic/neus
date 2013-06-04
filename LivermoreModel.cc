@@ -202,11 +202,9 @@ Double_t NEUS::LivermoreModel::WilsonN2(Double_t *x, Double_t *parameter)
    if (time<fMinT || time>fMaxT) {
       Warning("WilsonN2","Time is out of range!");
       Warning("WilsonN2","Return 0!");
-      Printf("time: %f", time);
       return 0;
    }
    if (energy<fMinE || energy>fMaxE) {
-      Printf("energy: %f", energy);
       Warning("WilsonN2","Energy is out of range!");
       Warning("WilsonN2","Return 0!");
       return 0;
@@ -234,13 +232,13 @@ Double_t NEUS::LivermoreModel::WilsonNe(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
    Double_t tmax = parameter[1]; // upper limit of time [second]
    if (energy<fMinE || energy>fMaxE) {
-      Warning("WilsonN2","Energy is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonNe","Energy is out of range!");
+      Warning("WilsonNe","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonNe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonNe","Return 0!");
       return 0;
    }
    if (tmax<10) tmax = 10; // do not handle very small upper limit
@@ -301,13 +299,13 @@ Double_t NEUS::LivermoreModel::WilsonNt(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
 
    if (time<fMinT || time>fMaxT) {
-      Warning("WilsonN2","Time is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonNt","Time is out of range!");
+      Warning("WilsonNt","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonNt","Return 0!");
       return 0;
    }
    Double_t n1=0, n2=0, n3=0;
@@ -337,18 +335,18 @@ Double_t NEUS::LivermoreModel::WilsonL2(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
 
    if (time<fMinT || time>fMaxT) {
-      Warning("WilsonN2","Time is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonL2","Time is out of range!");
+      Warning("WilsonL2","Return 0!");
       return 0;
    }
    if (energy<fMinE || energy>fMaxE) {
-      Warning("WilsonN2","Energy is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonL2","Energy is out of range!");
+      Warning("WilsonL2","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonL2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonL2","Return 0!");
       return 0;
    }
 
@@ -369,13 +367,13 @@ Double_t NEUS::LivermoreModel::WilsonLe(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
    Double_t tmax = parameter[1]; // upper limit of time [second]
    if (energy<fMinE || energy>fMaxE) {
-      Warning("WilsonN2","Energy is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonLe","Energy is out of range!");
+      Warning("WilsonLe","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonLe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonLe","Return 0!");
       return 0;
    }
    if (tmax<10) tmax = 10; // do not handle very small upper limit
@@ -436,13 +434,13 @@ Double_t NEUS::LivermoreModel::WilsonLt(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
 
    if (time<fMinT || time>fMaxT) {
-      Warning("WilsonN2","Time is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonLt","Time is out of range!");
+      Warning("WilsonLt","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonLt","Return 0!");
       return 0;
    }
 
@@ -472,13 +470,13 @@ Double_t NEUS::LivermoreModel::WilsonEt(Double_t *x, Double_t *parameter)
    UShort_t type = static_cast<UShort_t>(parameter[0]); // type of neutrino
 
    if (time<fMinT || time>fMaxT) {
-      Warning("WilsonN2","Time is out of range!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonEt","Time is out of range!");
+      Warning("WilsonEt","Return 0!");
       return 0;
    }
    if (type<1 || type>6) {
-      Warning("WilsonN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("WilsonN2","Return 0!");
+      Warning("WilsonEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("WilsonEt","Return 0!");
       return 0;
    }
 
