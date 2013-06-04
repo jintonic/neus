@@ -53,17 +53,20 @@ int main()
 
    can->Print("livermore.ps");
 
-   // <E>(t)
-   can->SetLogy(0);
-   TF1 *fEt1 = sn->FEt(1);
-   TF1 *fEt2 = sn->FEt(2);
-   TF1 *fEt3 = sn->FEt(3);
+   // L(t)
+   TF1 *fLt1 = sn->FLt(1);
+   TF1 *fLt2 = sn->FLt(2);
+   TF1 *fLt3 = sn->FLt(3);
 
-   fEt1->GetXaxis()->SetRangeUser(0.,1.5);
-   fEt1->GetYaxis()->SetRangeUser(5,30);
-   fEt1->Draw();
-   fEt2->Draw("same");
-   fEt3->Draw("same");
+   can->SetLogx();
+   fLt1->SetRange(0.02,17.9012); // works, but recreate histogram :(
+   fLt1->GetXaxis()->SetTitle("time [second]");
+   fLt1->GetYaxis()->SetRangeUser(3,1e4);
+   fLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
+   fLt1->SetTitle(sn->GetTitle());
+   fLt1->Draw();
+   fLt2->Draw("same");
+   fLt3->Draw("same");
 
    leg->Clear();
    leg->SetHeader("");
@@ -74,38 +77,22 @@ int main()
    leg->Draw();
    can->Print("livermore.ps");
 
-   can->SetLogx();
-   fEt1->GetXaxis()->SetRangeUser(3e-2,17);
+   // <E>(t)
+   TF1 *fEt1 = sn->FEt(1);
+   TF1 *fEt2 = sn->FEt(2);
+   TF1 *fEt3 = sn->FEt(3);
+
+   can->SetLogy(0);
+   fEt1->SetRange(2.5e-2,17);
+   fEt1->GetXaxis()->SetTitle("time [second]");
    fEt1->GetYaxis()->SetRangeUser(5,30);
+   fEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
    fEt1->Draw();
    fEt2->Draw("same");
    fEt3->Draw("same");
 
-   leg->Draw();
-   can->Print("livermore.ps");
-
-   // L(t)
-   can->SetLogy();
-   TF1 *fLt1 = sn->FLt(1);
-   TF1 *fLt2 = sn->FLt(2);
-   TF1 *fLt3 = sn->FLt(3);
-
-   fLt1->GetXaxis()->SetRangeUser(1.2e-3,0.55);
-   //fLt1->GetYaxis()->SetRangeUser(1e50,3e53);
-   fLt1->SetTitle(sn->GetTitle());
-   fLt1->Draw();
-   fLt2->Draw("same");
-   fLt3->Draw("same");
-
-   leg->Draw();
-   can->Print("livermore.ps");
-
-   fLt1->GetXaxis()->SetRangeUser(1.2e-3,18.);
-   //fLt1->GetYaxis()->SetRangeUser(1e50,1e52);
-   fLt1->Draw();
-   fLt2->Draw("same");
-   fLt3->Draw("same");
-
+   leg->SetX1NDC(0.3);
+   leg->SetX2NDC(0.5);
    leg->Draw();
    can->Print("livermore.ps");
 
