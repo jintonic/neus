@@ -30,18 +30,18 @@ int main()
    sn->FN2(1)->Draw("colz");
    can->Print("livermore.ps");
 
-   // N(E) in 18 second
-   TF1 *fNe1 = sn->FNe(1);
-   TF1 *fNe2 = sn->FNe(2);
-   TF1 *fNex = sn->FNe(3);
+   // N(E) in 17.9012 second
+   can->SetLogy(); // set before creating histograms
+   TH1D *hNe1 = sn->HNe(1);
+   TH1D *hNe2 = sn->HNe(2);
+   TH1D *hNex = sn->HNe(3);
 
-   can->SetLogy();
-   fNe1->GetXaxis()->SetRangeUser(0,60);
-   fNe1->GetYaxis()->SetRangeUser(1e3,1e7);
-   fNe1->GetYaxis()->SetTitle("number of neutrino [10^{50}/MeV]");
-   fNe1->Draw();
-   fNe2->Draw("same");
-   fNex->Draw("same");
+   hNe1->GetXaxis()->SetRangeUser(0,60);
+   hNe1->GetYaxis()->SetRangeUser(1e3,1e7);
+   hNe1->GetYaxis()->SetTitle("number of neutrino [10^{50}/MeV]");
+   hNe1->Draw();
+   hNe2->Draw("same");
+   hNex->Draw("same");
 
    sn->FNeFD(1)->Draw("same");
    sn->FNeFD(2)->Draw("same");
@@ -50,54 +50,106 @@ int main()
    TLegend *leg = new TLegend(0.5,0.60,0.88,0.88);
    leg->SetFillColor(0);
    leg->SetBorderSize(0);
-   leg->SetHeader("total number of #nu within 18 second:");
-   leg->AddEntry(fNe1, Form("#nu_{e}: %.1e",sn->Nall(1)*1e50),"l");
-   leg->AddEntry(fNe2,Form("#bar{#nu}_{e}: %.1e",sn->Nall(2)*1e50),"l");
-   leg->AddEntry(fNex, Form("#nu_{x}: %.1e",sn->Nall(3)*1e50),"l");
+   leg->SetHeader("total number of #nu within 17.9 second:");
+   leg->AddEntry(hNe1, Form("#nu_{e}: %.1e",sn->Nall(1)*1e50),"l");
+   leg->AddEntry(hNe2,Form("#bar{#nu}_{e}: %.1e",sn->Nall(2)*1e50),"l");
+   leg->AddEntry(hNex, Form("#nu_{x}: %.1e",sn->Nall(3)*1e50),"l");
    leg->Draw();
 
    can->Print("livermore.ps");
 
    // L(t)
-   TF1 *fLt1 = sn->FLt(1);
-   TF1 *fLt2 = sn->FLt(2);
-   TF1 *fLt3 = sn->FLt(3);
+   sn->FLt(1)->SetNpx(1000); // set # of bins of histogram
+   sn->FLt(3)->SetNpx(1000);
+   sn->FLt(2)->SetNpx(1000);
+   can->SetLogy(0); // set before creating histograms
 
-   can->SetLogx();
-   fLt1->SetRange(0.02,17.9012); // works, but recreate histogram :(
-   fLt1->GetXaxis()->SetTitle("time [second]");
-   fLt1->GetYaxis()->SetRangeUser(3,1e4);
-   fLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
-   fLt1->SetTitle(sn->GetTitle());
-   fLt1->Draw();
-   fLt2->Draw("same");
-   fLt3->Draw("same");
+   TH1D *hLt1 = sn->HLt(1);
+   TH1D *hLt2 = sn->HLt(2);
+   TH1D *hLt3 = sn->HLt(3);
+
+   hLt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
+   hLt1->GetYaxis()->SetRangeUser(0,1000);
+   hLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
+   hLt1->SetTitle(sn->GetTitle());
+   hLt1->Draw();
+   hLt2->Draw("same");
+   hLt3->Draw("same");
 
    leg->Clear();
    leg->SetHeader("");
    leg->SetX1NDC(0.6);
-   leg->AddEntry(fNe1, "#nu_{e}");
-   leg->AddEntry(fNe2, "#bar{#nu}_{e}");
-   leg->AddEntry(fNex, "#nu_{x}");
+   leg->AddEntry(hNe1, "#nu_{e}");
+   leg->AddEntry(hNe2, "#bar{#nu}_{e}");
+   leg->AddEntry(hNex, "#nu_{x}");
+   leg->Draw();
+   can->Print("livermore.ps");
+
+   sn->FLt(1)->Update(); // delete internal histogram
+   sn->FLt(2)->Update(); // delete internal histogram
+   sn->FLt(3)->Update(); // delete internal histogram
+   can->SetLogx(); // set before creating histograms
+   can->SetLogy(); // set before creating histograms
+
+   hLt1 = sn->HLt(1);
+   hLt2 = sn->HLt(2);
+   hLt3 = sn->HLt(3);
+
+   hLt1->GetXaxis()->SetRangeUser(0.0212,17.9012);
+   hLt1->GetYaxis()->SetRangeUser(3,1e4);
+   hLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
+   hLt1->SetTitle(sn->GetTitle());
+   hLt1->Draw();
+   hLt2->Draw("same");
+   hLt3->Draw("same");
+
    leg->Draw();
    can->Print("livermore.ps");
 
    // <E>(t)
-   TF1 *fEt1 = sn->FEt(1);
-   TF1 *fEt2 = sn->FEt(2);
-   TF1 *fEt3 = sn->FEt(3);
+   sn->FEt(1)->SetNpx(1000); // set # of bins of histogram
+   sn->FEt(3)->SetNpx(1000);
+   sn->FEt(2)->SetNpx(1000);
+   can->SetLogx(1); // set before creating histograms
+   can->SetLogy(0); // set before creating histograms
 
-   can->SetLogy(0);
-   fEt1->SetRange(2.5e-2,17);
-   fEt1->GetXaxis()->SetTitle("time [second]");
-   fEt1->GetYaxis()->SetRangeUser(5,30);
-   fEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
-   fEt1->Draw();
-   fEt2->Draw("same");
-   fEt3->Draw("same");
+   TH1D *hEt1 = sn->HEt(1);
+   TH1D *hEt2 = sn->HEt(2);
+   TH1D *hEt3 = sn->HEt(3);
+
+   hEt1->GetXaxis()->SetRangeUser(2.5e-2,17);
+   hEt1->GetYaxis()->SetRangeUser(5,30);
+   hEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
+   hEt1->Draw();
+   hEt2->Draw("same");
+   hEt3->Draw("same");
 
    leg->SetX1NDC(0.3);
    leg->SetX2NDC(0.5);
+   leg->Draw();
+   can->Print("livermore.ps");
+
+   sn->FEt(1)->Update(); // delete internal histogram
+   sn->FEt(2)->Update(); // delete internal histogram
+   sn->FEt(3)->Update(); // delete internal histogram
+   can->SetLogx(0); // set before creating histograms
+   can->SetLogy(0); // set before creating histograms
+
+   hEt1 = sn->HEt(1);
+   hEt2 = sn->HEt(2);
+   hEt3 = sn->HEt(3);
+
+   hEt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
+   hEt1->GetYaxis()->SetRangeUser(5,27);
+   hEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
+   hEt1->Draw();
+   hEt2->Draw("same");
+   hEt3->Draw("same");
+
+   leg->SetX1NDC(0.15);
+   leg->SetX2NDC(0.35);
+   leg->SetY1NDC(0.65);
+   leg->SetY2NDC(0.88);
    leg->Draw();
    can->Print("livermore.ps");
 
