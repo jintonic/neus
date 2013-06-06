@@ -14,6 +14,7 @@ NEUS::SupernovaModel::SupernovaModel() : TNamed(), fDataLocation(),
 {
    for (UShort_t i=0; i<fgNtype; i++) {
       fTotalN[i] = 0;
+      fTotalL[i] = 0;
       fAverageE[i] = 1.0; // 0 cannot be in the denominator
       fNeFD[i] = NULL;
    }
@@ -27,6 +28,7 @@ NEUS::SupernovaModel::SupernovaModel(const char *name, const char *title) :
 {
    for (UShort_t i=0; i<fgNtype; i++) {
       fTotalN[i] = 0;
+      fTotalL[i] = 0;
       fAverageE[i] = 1;
       fNeFD[i] = NULL;
    }
