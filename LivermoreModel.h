@@ -32,6 +32,8 @@ class NEUS::LivermoreModel : public SupernovaModel
       ~LivermoreModel();
 
       void SetDataLocation(const char *dir);
+      void UseDivariData();
+      void Clear(Option_t *option="");
 
       Double_t N2(UShort_t type, Double_t time, Double_t energy); // N(t, E) [1e50/s/MeV]
       Double_t Ne(UShort_t type, Double_t energy); // N(t) [1e50/s]
