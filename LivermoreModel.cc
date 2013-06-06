@@ -58,6 +58,33 @@ void NEUS::LivermoreModel::SetDataLocation(const char *dir)
    gSystem->Setenv("TOTAL_DATA_DIR", dir);
 }
 
+//______________________________________________________________________________
+//
+
+void NEUS::LivermoreModel::UseDivariData()
+{
+   fTotalN[1] = 3.0e7; // * 1e50
+   fTotalN[2] = 2.1e7; // * 1e50
+   fTotalN[3] = 1.85e7; // * 1e50
+
+   fAverageE[1] = 3.5*3; // MeV
+   fAverageE[2] = 5.0*3; // MeV
+   fAverageE[3] = 8.0*3; // MeV
+}
+
+//______________________________________________________________________________
+//
+
+void NEUS::LivermoreModel::Clear(Option_t *option)
+{
+   fTotalN[1] = 0.;
+   fTotalN[2] = 0.;
+   fTotalN[3] = 0.;
+
+   fAverageE[1] = 1.;
+   fAverageE[2] = 1.;
+   fAverageE[3] = 1.;
+}
 
 //______________________________________________________________________________
 //
@@ -164,9 +191,6 @@ Double_t NEUS::LivermoreModel::Nall(UShort_t type)
    fTotalN[1]/=1e50;
    fTotalN[2]/=1e50;
    fTotalN[3]/=1e50;
-   fTotalN[4] = fTotalN[3];
-   fTotalN[5] = fTotalN[3];
-   fTotalN[6] = fTotalN[3];
 
    if (type==1) return fTotalN[1];
    else if (type==2) return fTotalN[2];
