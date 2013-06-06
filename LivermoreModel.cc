@@ -70,6 +70,8 @@ void NEUS::LivermoreModel::UseDivariData()
    fAverageE[1] = 3.5*3; // MeV
    fAverageE[2] = 5.0*3; // MeV
    fAverageE[3] = 8.0*3; // MeV
+
+   SetName("DivariApproximation");
 }
 
 //______________________________________________________________________________
@@ -84,6 +86,8 @@ void NEUS::LivermoreModel::Clear(Option_t *option)
    fAverageE[1] = 1.;
    fAverageE[2] = 1.;
    fAverageE[3] = 1.;
+
+   SetName("LivermoreModel");
 }
 
 //______________________________________________________________________________
