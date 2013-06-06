@@ -88,6 +88,13 @@ class NEUS::LivermoreModel : public SupernovaModel
 
       TF1* FEt(UShort_t type=1);
 
+      /**
+       * Set number of bins in energy axis.
+       * It sets precision of histograms created inside TF1 or TF2.
+       */
+      void SetNbinsE(Int_t n=1000);
+      void SetNbinsT(Int_t n=1000);
+
       void Print();
 
       ClassDef(LivermoreModel,1);
