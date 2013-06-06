@@ -33,7 +33,7 @@ class NEUS::SupernovaModel : public TNamed
        * type 0: reserved for special uses
        */
       static const UShort_t fgNtype = 7;
-      Double_t fTotalN[fgNtype];
+      Double_t fTotalN[fgNtype], fTotalL[fgNtype];
       Double_t fAverageE[fgNtype];
 
       TF1 *fNeFD[fgNtype];
@@ -81,6 +81,7 @@ class NEUS::SupernovaModel : public TNamed
       virtual Double_t NeFD(UShort_t type, Double_t energy);
 
       virtual Double_t Nall(UShort_t type) { return fTotalN[type]; }
+      virtual Double_t Lall(UShort_t type) { return fTotalL[type]; }
       virtual Double_t Eave(UShort_t type) { return fAverageE[type]; }
 
       /**
