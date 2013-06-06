@@ -855,3 +855,26 @@ void NEUS::LivermoreModel::Print()
          Nall(1)*1e50 + Nall(2)*1e50 + Nall(3)*1e50*4,
          Lall(1)*1e50 + Lall(2)*1e50 + Lall(3)*1e50*4);
 }
+
+//______________________________________________________________________________
+//
+
+void NEUS::LivermoreModel::SetNbinsE(Int_t n)
+{
+   FN2()->SetNpy(n);
+   FL2()->SetNpy(n);
+   FNe()->SetNpx(n);
+   FLe()->SetNpx(n);
+}
+
+//______________________________________________________________________________
+//
+
+void NEUS::LivermoreModel::SetNbinsT(Int_t n)
+{
+   FN2()->SetNpx(n);
+   FL2()->SetNpx(n);
+   FNt()->SetNpx(n);
+   FLt()->SetNpx(n);
+}
+
