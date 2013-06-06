@@ -14,7 +14,7 @@ NEUS::SupernovaModel::SupernovaModel() : TNamed(), fDataLocation(),
 {
    for (UShort_t i=0; i<fgNtype; i++) {
       fTotalN[i] = 0;
-      fAverageE[i] = 1.0;
+      fAverageE[i] = 1.0; // 0 cannot be in the denominator
       fNeFD[i] = NULL;
    }
 }
@@ -23,8 +23,7 @@ NEUS::SupernovaModel::SupernovaModel() : TNamed(), fDataLocation(),
 //
 
 NEUS::SupernovaModel::SupernovaModel(const char *name, const char *title) : 
-   TNamed(name, title), fDataLocation(),
-   fMinE(0), fMaxE(0), fMinT(0), fMaxT(0)
+   TNamed(name, title), fDataLocation(), fMinE(0), fMaxE(0), fMinT(0), fMaxT(0)
 {
    for (UShort_t i=0; i<fgNtype; i++) {
       fTotalN[i] = 0;
@@ -51,9 +50,9 @@ Double_t NEUS::SupernovaModel::NeFD(UShort_t type, Double_t energy)
       Warning("NeFD","0 is returned!");
       return 0;
    }
-   Double_t c = 0.55 * Nall(type);
-   Double_t t = Eave(type)/3.;
-   return c/t/t/t * energy*energy/(1.+exp(energy/t));
+   Double_t co = 0.55 * Nall(type); // coefficient
+   Double_t kT = Eave(type)*2/6.; // <E> = NDF*kT/2 => kT = <E>*2/NDF
+   return co/kT/kT/kT * energy*energy/(1.+exp(energy/kT));
 }
 
 //______________________________________________________________________________
@@ -83,18 +82,24 @@ TF1* NEUS::SupernovaModel::FNeFD(UShort_t type)
          fMinE, fMaxE, 1, "SupernovaModel", "HNeFD");
    fNeFD[type]->SetParameter(0,type);
 
-   fNeFD[type]->GetXaxis()->SetTitle("neutrino energy [MeV]");
+   // fHistogram in TF1 has not yet been created at this moment,
+   // preperties should be saved in TF1 instead of fHistogram.
+   // That is why fNeFD[type]->SetTitle() is called instead of
+   // fNeFD[type]->GetXaxis()->SetTitle(), 
+   // which returns the x axis of fHistogram.
    if (type==1) {
-      fNeFD[type]->GetYaxis()->SetTitle("number of #nu_{e} [10^{50}/second]");
+      fNeFD[type]->SetTitle(
+            ";neutrino energy [MeV];number of #nu_{e} [10^{50}/second];");
       fNeFD[type]->SetLineColor(kBlack);
       fNeFD[type]->SetLineStyle(kDashed);
    } else if (type==2) {
-      fNeFD[type]->GetYaxis()
-         ->SetTitle("number of #bar{#nu}_{e} [10^{50}/second]");
+      fNeFD[type]->SetTitle(
+            ";neutrino energy [MeV];number of #bar{#nu}_{e} [10^{50}/second];");
       fNeFD[type]->SetLineColor(kRed);
       fNeFD[type]->SetLineStyle(kDashed);
    } else {
-      fNeFD[type]->GetYaxis()->SetTitle("number of #nu_{x} [10^{50}/second]");
+      fNeFD[type]->SetTitle(
+            ";neutrino energy [MeV];number of #nu_{x} [10^{50}/second];");
       fNeFD[type]->SetLineColor(kBlue);
       fNeFD[type]->SetLineStyle(kDashed);
    }
