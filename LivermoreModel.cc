@@ -200,6 +200,87 @@ Double_t NEUS::LivermoreModel::Nall(UShort_t type)
 //______________________________________________________________________________
 //
 
+Double_t NEUS::LivermoreModel::Lall(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("Lall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("Lall","Return 0!");
+      return 0;
+   }
+   if (fTotalL[type]!=0) return fTotalL[type];
+
+   Double_t dNL1, dNL2, dNL3;
+
+   Double_t energy = fMinE; // start energy [MeV]
+   Double_t de = 2; // energy step [MeV]
+
+   Double_t time = fMinT; // start time [second]
+   Double_t dt = 1.e-3; // time interval [second]
+
+   while (time<0.1) { // fine step before 0.1 second
+      dt = 1.e-3;
+      energy = fMinE;
+      while (energy<fMaxE) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
+         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
+         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
+         energy+=de;
+      }
+      time += dt;
+   }
+
+   while (time>=0.1 && time<1) {
+      dt = 1.e-2;
+      energy = fMinE;
+      while (energy<fMaxE) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
+         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
+         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
+         energy+=de;
+      }
+      time += dt;
+   }
+
+   while (time>=1 && time<10) {
+      dt = 1.e-1;
+      energy = fMinE;
+      while (energy<fMaxE) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
+         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
+         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
+         energy+=de;
+      }
+      time += dt;
+   }
+
+   while (time>=10 && time<=fMaxT) { // coarse step after 10 second
+      dt = 1; // time interval
+      energy = fMinE;
+      while (energy<fMaxE) {
+         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
+         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
+         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
+         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
+         energy+=de;
+      }
+      time += dt;
+   }
+
+   fTotalL[1]/=1e50;
+   fTotalL[2]/=1e50;
+   fTotalL[3]/=1e50;
+
+   if (type==1) return fTotalL[1];
+   else if (type==2) return fTotalL[2];
+   else return fTotalL[3];
+}
+
+//______________________________________________________________________________
+//
+
 Double_t NEUS::LivermoreModel::Eave(UShort_t type)
 {
    if (type<1 || type>6) {
@@ -535,18 +616,17 @@ TF2* NEUS::LivermoreModel::FN2(UShort_t type)
    fN2[type] = new TF2(Form("fN2%d",type), this, &LivermoreModel::WilsonN2,
          fMinT, fMaxT, fMinE, fMaxE, 1, "LivermoreModel", "FN2");
    fN2[type]->SetParameter(0,type);
-   fN2[type]->SetNpx(179);
-   fN2[type]->SetNpy(80);
-   fN2[type]->GetXaxis()->SetTitle("time [second]");
-   fN2[type]->GetYaxis()->SetTitle("neutrino energy [MeV]");
    if (type==1) {
-      fN2[type]->SetTitle("number of #nu_{e} [10^{50}/second/MeV]");
+      fN2[type]->SetTitle(
+            "number of #nu_{e} [10^{50}/second/MeV];time [second];energy [MeV]");
       fN2[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fN2[type]->SetTitle("number of #bar{#nu}_{e} [10^{50}/second/MeV]");
+      fN2[type]->SetTitle(
+            "number of #bar{#nu}_{e} [10^{50}/second/MeV];time [second];energy [MeV]");
       fN2[type]->SetLineColor(kRed);
    } else {
-      fN2[type]->SetTitle("number of #nu_{x} [10^{50}/second/MeV]");
+      fN2[type]->SetTitle(
+            "number of #nu_{x} [10^{50}/second/MeV];time [second];energy [MeV]");
       fN2[type]->SetLineColor(kBlue);
    }
    return fN2[type];
@@ -562,18 +642,17 @@ TF2* NEUS::LivermoreModel::FL2(UShort_t type)
    fL2[type] = new TF2(Form("fL2%d",type), this, &LivermoreModel::WilsonL2,
          fMinT, fMaxT, fMinE, fMaxE, 1, "LivermoreModel", "FL2");
    fL2[type]->SetParameter(0,type);
-   fL2[type]->SetNpx(179);
-   fL2[type]->SetNpy(80);
-   fL2[type]->GetXaxis()->SetTitle("time [second]");
-   fL2[type]->GetYaxis()->SetTitle("neutrino energy [MeV]");
    if (type==1) {
-      fL2[type]->SetTitle("luminosity of #nu_{e} [10^{50}/second/erg]");
+      fL2[type]->SetTitle(
+            "luminosity of #nu_{e} [10^{50}/second/erg];time [second];energy [MeV]");
       fL2[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fL2[type]->SetTitle("luminosity of #bar{#nu}_{e} [10^{50}/second/erg]");
+      fL2[type]->SetTitle(
+            "luminosity of #bar{#nu}_{e} [10^{50}/second/erg];time [second];energy [MeV]");
       fL2[type]->SetLineColor(kRed);
    } else {
-      fN2[type]->SetTitle("luminosity of #nu_{x} [10^{50}/second/erg]");
+      fN2[type]->SetTitle(
+            "luminosity of #nu_{x} [10^{50}/second/erg];time [second];energy [MeV]");
       fL2[type]->SetLineColor(kBlue);
    }
    return fL2[type];
@@ -591,17 +670,14 @@ TF1* NEUS::LivermoreModel::FNe(UShort_t type, Double_t tmax)
    fNe[type]->SetParameter(0,type);
    fNe[type]->SetParameter(1,tmax);
 
-   fNe[type]->SetNpx(80);
-   fNe[type]->GetXaxis()->SetTitle("neutrino energy [MeV]");
    if (type==1) {
-      fNe[type]->GetYaxis()->SetTitle("number of #nu_{e} [10^{50}/MeV]");
+      fNe[type]->SetTitle(";energy [MeV];number of #nu_{e} [10^{50}/MeV]");
       fNe[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fNe[type]->GetYaxis()
-         ->SetTitle("number of #bar{#nu}_{e} [10^{50}/MeV]");
+      fNe[type]->SetTitle(";energy [MeV];number of #bar{#nu}_{e} [10^{50}/MeV]");
       fNe[type]->SetLineColor(kRed);
    }else {
-      fNe[type]->GetYaxis()->SetTitle("number of #nu_{x} [10^{50}/MeV]");
+      fNe[type]->SetTitle(";energy [MeV];number of #nu_{x} [10^{50}/MeV]");
       fNe[type]->SetLineColor(kBlue);
    }
    return fNe[type];
@@ -619,19 +695,17 @@ TF1* NEUS::LivermoreModel::FLe(UShort_t type, Double_t tmax)
    fLe[type]->SetParameter(0,type);
    fLe[type]->SetParameter(1,tmax);
 
-   fLe[type]->SetNpx(80);
-   fLe[type]->GetXaxis()->SetTitle("neutrino energy [MeV]");
    if (type==1) {
-      fLe[type]->GetYaxis()
-      ->SetTitle("luminosity of #nu_{e} [10^{50} erg/MeV]");
+      fLe[type]->SetTitle(
+            ";energy [MeV];luminosity of #nu_{e} [10^{50} erg/MeV]");
       fLe[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fLe[type]->GetYaxis()
-      ->SetTitle("luminosity of #bar{#nu}_{e} [10^{50} erg/MeV]");
+      fLe[type]->SetTitle(
+            ";energy [MeV];luminosity of #bar{#nu}_{e} [10^{50} erg/MeV]");
       fLe[type]->SetLineColor(kRed);
    } else {
-      fLe[type]->GetYaxis()
-      ->SetTitle("luminosity of #nu_{x} [10^{50} erg/MeV]");
+      fLe[type]->SetTitle(
+            ";energy [MeV];luminosity of #nu_{x} [10^{50} erg/MeV]");
       fLe[type]->SetLineColor(kBlue);
    }
    return fLe[type];
@@ -648,17 +722,17 @@ TF1* NEUS::LivermoreModel::FNt(UShort_t type)
          fMinT, fMaxT, 1, "LivermoreModel", "FNt");
    fNt[type]->SetParameter(0,type);
 
-   fNt[type]->SetNpx(179);
-   fNt[type]->GetXaxis()->SetTitle("time [second]");
    if (type==1) {
-      fNt[type]->GetYaxis()->SetTitle("number of #nu_{e} [10^{50}/second]");
+      fNt[type]->SetTitle(
+            ";time [second];number of #nu_{e} [10^{50}/second]");
       fNt[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fNt[type]->GetYaxis()
-      ->SetTitle("number of #bar{#nu}_{e} [10^{50}/second]");
+      fNt[type]->SetTitle(
+            ";time [second];number of #bar{#nu}_{e} [10^{50}/second]");
       fNt[type]->SetLineColor(kRed);
    } else {
-      fNt[type]->GetYaxis()->SetTitle("number of #nu_{x} [10^{50}/second]");
+      fNt[type]->SetTitle(
+            ";time [second];number of #nu_{x} [10^{50}/second]");
       fNt[type]->SetLineColor(kBlue);
    }
    return fNt[type];
@@ -675,19 +749,17 @@ TF1* NEUS::LivermoreModel::FLt(UShort_t type)
          fMinT, fMaxT, 1, "LivermoreModel", "FLt");
    fLt[type]->SetParameter(0,type);
 
-   fLt[type]->SetNpx(179);
-   fLt[type]->GetXaxis()->SetTitle("time [second]");
    if (type==1) {
-      fLt[type]->GetYaxis()
-      ->SetTitle("luminosity of #nu_{e} [10^{50} erg/second]");
+      fLt[type]->SetTitle(
+            ";time [second];luminosity of #nu_{e} [10^{50} erg/second]");
       fLt[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fLt[type]->GetYaxis()
-      ->SetTitle("luminosity of #bar{#nu}_{e} [10^{50} erg/second]");
+      fLt[type]->SetTitle(
+            ";time [second];luminosity of #bar{#nu}_{e} [10^{50} erg/second]");
       fLt[type]->SetLineColor(kRed);
    } else {
-      fLt[type]->GetYaxis()
-      ->SetTitle("luminosity of #nu_{x} [10^{50} erg/second]");
+      fLt[type]->SetTitle(
+            ";time [second];luminosity of #nu_{x} [10^{50} erg/second]");
       fLt[type]->SetLineColor(kBlue);
    }
    return fLt[type];
@@ -704,16 +776,14 @@ TF1* NEUS::LivermoreModel::FEt(UShort_t type)
          fMinT, fMaxT, 1, "LivermoreModel", "FEt");
    fEt[type]->SetParameter(0,type);
 
-   fEt[type]->SetNpx(179);
-   fEt[type]->GetXaxis()->SetTitle("time [second]");
    if (type==1) {
-      fEt[type]->GetYaxis()->SetTitle("<E> of #nu_{e} [MeV/second]");
+      fEt[type]->SetTitle(";time [second];<E> of #nu_{e} [MeV/second]");
       fEt[type]->SetLineColor(kBlack);
    } else if (type==2) {
-      fEt[type]->GetYaxis()->SetTitle("<E> of #bar{#nu}_{e} [MeV/second]");
+      fEt[type]->SetTitle(";time [second];<E> of #bar{#nu}_{e} [MeV/second]");
       fEt[type]->SetLineColor(kRed);
    } else {
-      fEt[type]->GetYaxis()->SetTitle("<E> of #nu_{x} [MeV/second]");
+      fEt[type]->SetTitle(";time [second];<E> of #nu_{x} [MeV/second]");
       fEt[type]->SetLineColor(kBlue);
    }
    return fEt[type];
@@ -780,7 +850,8 @@ TH1D* NEUS::LivermoreModel::HEt(UShort_t type)
 
 void NEUS::LivermoreModel::Print()
 {
-   Printf("20 Solar mass, Livermore:     n1=%1.2e, n2=%1.2e, nx=%1.2e, total=%1.2e",
+   Printf("20 Solar mass, Livermore:     N1=%1.2e, N2=%1.2e, Nx=%1.2e, N=%1.2e, L=%1.2e erg",
          Nall(1)*1e50, Nall(2)*1e50, Nall(3)*1e50, 
-         Nall(1)*1e50 + Nall(2)*1e50 + Nall(3)*1e50*4);
+         Nall(1)*1e50 + Nall(2)*1e50 + Nall(3)*1e50*4,
+         Lall(1)*1e50 + Lall(2)*1e50 + Lall(3)*1e50*4);
 }
