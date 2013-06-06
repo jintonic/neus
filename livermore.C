@@ -17,6 +17,11 @@ int main()
    LivermoreModel *sn = new LivermoreModel;
    sn->SetDataLocation("../total");
 
+   cout<<"average neutrino energy:"<<endl;
+   cout<<"type 1: "<<sn->Eave(1)<<" MeV"<<endl;
+   cout<<"type 2: "<<sn->Eave(2)<<" MeV"<<endl;
+   cout<<"type x: "<<sn->Eave(3)<<" MeV"<<endl;
+
    // draw spectra
    TCanvas *can = new TCanvas;
    can->Print("livermore.ps[");
