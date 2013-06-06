@@ -86,8 +86,8 @@ class NEUS::SupernovaModel : public TNamed
 
       /**
        * Number of neutrinos in TH2D format.
-       * x axis: neutrino energy in unit of MeV/c2, in [EMin(), EMax()].
-       * y axis: second after the core collapse, in [TMin(), TMax()].
+       * x axis: second after the core collapse, in [TMin(), TMax()].
+       * y axis: neutrino energy in unit of MeV/c2, in [EMin(), EMax()].
        * z axis: number of neutrinos in unit of 1e50/MeV/second.
        */
       virtual TH2D* HN2(UShort_t type) { return 0; }
@@ -103,8 +103,8 @@ class NEUS::SupernovaModel : public TNamed
 
       /**
        * Luminosity of neutrinos in TH2D format.
-       * x axis: neutrino energy in unit of MeV/c2, in [EMin(), EMax()].
-       * y axis: second after the core collapse, in [TMin(), TMax()].
+       * x axis: second after the core collapse, in [TMin(), TMax()].
+       * y axis: neutrino energy in unit of MeV/c2, in [EMin(), EMax()].
        * z axis: luminosity of neutrinos in unit of 1e50*erg/MeV/second.
        */
       virtual TH2D* HL2(UShort_t type) { return 0; }
