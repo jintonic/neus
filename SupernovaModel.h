@@ -33,6 +33,11 @@ class NEUS::SupernovaModel : public TNamed
       virtual void SetDataLocation(const char *dir) { fDataLocation=dir; }
       const char* DataLocation() { return fDataLocation; }
 
+      Double_t TMax() { return fMaxT; }
+      Double_t TMin() { return fMinT; }
+      Double_t EMax() { return fMaxT; }
+      Double_t EMin() { return fMinE; }
+
       virtual Double_t N2(UShort_t type/*1:v_e, 2: anti-v_e, 3, 4, 5, 6: v_x*/,
             Double_t time/*second*/, Double_t energy/*MeV*/) { return 0; }
       virtual Double_t Ne(UShort_t type, Double_t energy/*MeV*/) { return 0; }
