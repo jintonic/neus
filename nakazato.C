@@ -80,7 +80,7 @@ int main()
    hNex->Draw("same");
 
    leg->Clear();
-   leg->SetHeader(Form("total number of #nu within %.0f second:",tmax));
+   leg->SetHeader(Form("total number of #nu within %.1f second:",tmax));
    leg->AddEntry(hNe1, Form("#nu_{e}: %.1e",hNe1->Integral("width")*1e50),"l");
    leg->AddEntry(hNe2,
          Form("#bar{#nu}_{e}: %.1e",hNe2->Integral("width")*1e50),"l");
