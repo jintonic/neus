@@ -5,6 +5,13 @@
 
 namespace NEUS { class NakazatoModel; }
 
+/**
+ * Nakazato's supernova model.
+ * The data are saved in TH2D and TH1D format so that they can be easily
+ * visualized and interpolated. The data are not equally binned so do the
+ * histograms. They can be nicely displayed both in linear and in logrithmic
+ * scale.
+ */
 class NEUS::NakazatoModel : public SupernovaModel
 {
    private:
@@ -31,24 +38,39 @@ class NEUS::NakazatoModel : public SupernovaModel
       Double_t Metallicity() { return fMetallicity; }
       Double_t ReviveTime() { return fReviveTime; }
 
+      /**
+       * Load data as function of energy and time.
+       * The data are divided by 1e50 and then loaded into TH2D objects.
+       */
       void LoadFullData();
+      /**
+       * Load data as function of E.
+       * They are integrated in [TMin(), TMax()].
+       * The data are divided by 1e50 and then loaded into TH2D objects.
+       */
       void LoadIntegratedData();
 
-      Double_t N2(UShort_t type, Double_t time, Double_t energy); // N(t, E) [1e50/s/MeV]
-      Double_t Nt(UShort_t type, Double_t time); // N(t) [1e50/s]
-      Double_t Ne(UShort_t type, Double_t energy); // N(E) [1e50/MeV]
-      Double_t Nall(UShort_t type); // N [1e50]
+      Double_t N2(UShort_t type, Double_t time, Double_t energy);
+      Double_t Nt(UShort_t type, Double_t time);
+      Double_t Ne(UShort_t type, Double_t energy);
+      Double_t Nall(UShort_t type);
+      Double_t Lall(UShort_t type);
       Double_t Eave(UShort_t type);
 
-      TH2D* HN2(UShort_t type=1); // N(t, E) [1e50/s/MeV]
-      TH1D* HNt(UShort_t type=1); // N(t) [1e50/s]
-      TH1D* HNe(UShort_t type=1, Double_t tmax=0); // N(E) [1e50/MeV]
+      TH2D* HN2(UShort_t type=1);
+      TH1D* HNt(UShort_t type=1);
+      /**
+       * Number of neutrinos integrated from [TMin(), tmax]
+       * If tmax>TMax(), tmax is set to be TMax().
+       * If tmax=0, the integrated database is used instead of the full one.
+       */
+      TH1D* HNe(UShort_t type=1, Double_t tmax=0);
 
-      TH2D* HL2(UShort_t type=1); // L(t, E) [1e50 erg/s/MeV]
-      TH1D* HLt(UShort_t type=1); // L(t) [1e50 erg/s]
-      TH1D* HLe(UShort_t type=1, Double_t tmax=0); // L(E) [1e50 erg/MeV]
+      TH2D* HL2(UShort_t type=1);
+      TH1D* HLt(UShort_t type=1);
+      TH1D* HLe(UShort_t type=1, Double_t tmax=0);
 
-      TH1D* HEt(UShort_t type=1); // <E>(t)/s
+      TH1D* HEt(UShort_t type=1);
 
       void Print();
 
