@@ -438,19 +438,15 @@ TH1D* NEUS::NakazatoModel::HNe(UShort_t type, Double_t tmax)
       Warning("HNe","NULL pointer is returned!");
       return NULL;
    }
-   if (tmax>fMaxT) {
-      Warning("HNe","Max time exceed limit!");
-      Warning("HNe","NULL pointer is returned!");
-      return NULL;
-   }
+   if (tmax==0) return fHNe[type]; // from database
+   if (tmax>fMaxT) tmax=fMaxT;
+
    if (!fHNe[type]) {
       Warning("HNe","Spectrum does not exist!");
       Warning("HNe","Is the database correctly loaded?");
       Warning("HNe","NULL pointer is returned!");
       return NULL;
    }
-
-   if (tmax==0) return fHNe[type]; // from database
 
    TH1D *h = (TH1D*) gDirectory->Get(Form("hNe%d%.0f%.0f%.0f%f",type,
             fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
@@ -481,19 +477,15 @@ TH1D* NEUS::NakazatoModel::HLe(UShort_t type, Double_t tmax)
       Warning("HLe","NULL pointer is returned!");
       return NULL;
    }
-   if (tmax>fMaxT) {
-      Warning("HLe","Max time exceed limit!");
-      Warning("HLe","NULL pointer is returned!");
-      return NULL;
-   }
+   if (tmax==0) return fHLe[type]; // from database
+   if (tmax>fMaxT) tmax=fMaxT;
+
    if (!fHLe[type]) {
       Warning("HLe","Spectrum does not exist!");
       Warning("HLe","Is the database correctly loaded?");
       Warning("HLe","NULL pointer is returned!");
       return NULL;
    }
-
-   if (tmax==0) return fHLe[type]; // from database
 
    TH1D *h = (TH1D*) gDirectory->Get(Form("hLe%d%.0f%.0f%.0f%f",type,
             fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
