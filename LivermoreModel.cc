@@ -159,47 +159,14 @@ Double_t NEUS::LivermoreModel::Nall(UShort_t type)
    Double_t time = fMinT; // start time [second]
    Double_t dt = 1.e-3; // time interval [second]
 
-   while (time<0.1) { // fine step before 0.1 second
-      dt = 1.e-3;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalN[1] += dNL1*dt*de;
-         fTotalN[2] += dNL2*dt*de;
-         fTotalN[3] += dNL3*dt*de;
-         energy+=de;
-      }
-      time += dt;
-   }
+   while (time<=fMaxT) {
+      if (time<0.1) dt = 1e-3;
+      else if (time<0.5) dt = 5e-3;
+      else if (time<1.0) dt = 1e-2;
+      else if (time<4.0) dt = 5e-2;
+      else if (time<10.) dt = 1e-1;
+      else dt = 0.5;
 
-   while (time>=0.1 && time<1) {
-      dt = 1.e-2;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalN[1] += dNL1*dt*de;
-         fTotalN[2] += dNL2*dt*de;
-         fTotalN[3] += dNL3*dt*de;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   while (time>=1 && time<10) {
-      dt = 1.e-1;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalN[1] += dNL1*dt*de;
-         fTotalN[2] += dNL2*dt*de;
-         fTotalN[3] += dNL3*dt*de;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   while (time>=10 && time<=fMaxT) { // coarse step after 10 second
-      dt = 1; // time interval
       energy = fMinE;
       while (energy<fMaxE) {
          wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
@@ -240,47 +207,14 @@ Double_t NEUS::LivermoreModel::Lall(UShort_t type)
    Double_t time = fMinT; // start time [second]
    Double_t dt = 1.e-3; // time interval [second]
 
-   while (time<0.1) { // fine step before 0.1 second
-      dt = 1.e-3;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
-         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
-         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
-         energy+=de;
-      }
-      time += dt;
-   }
+   while (time<=fMaxT) {
+      if (time<0.1) dt = 1e-3;
+      else if (time<0.5) dt = 5e-3;
+      else if (time<1.0) dt = 1e-2;
+      else if (time<4.0) dt = 5e-2;
+      else if (time<10.) dt = 1e-1;
+      else dt = 0.5;
 
-   while (time>=0.1 && time<1) {
-      dt = 1.e-2;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
-         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
-         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   while (time>=1 && time<10) {
-      dt = 1.e-1;
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
-         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
-         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   while (time>=10 && time<=fMaxT) { // coarse step after 10 second
-      dt = 1; // time interval
       energy = fMinE;
       while (energy<fMaxE) {
          wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
@@ -376,36 +310,16 @@ Double_t NEUS::LivermoreModel::WilsonNe(Double_t *x, Double_t *parameter)
    Double_t dNL1, dNL2, dNL3;
 
    Double_t time = fMinT; // start time [second]
-
    Double_t dt = 1.e-3; // time interval [second]
-   while (time<0.1) { // fine step before 0.1 second
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      n1   += dNL1*dt;
-      n2   += dNL2*dt;
-      n3   += dNL3*dt;
-      time += dt;
-   }
 
-   dt = 1.e-2;
-   while (time>=0.1 && time<1) {
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      n1   += dNL1*dt;
-      n2   += dNL2*dt;
-      n3   += dNL3*dt;
-      time += dt;
-   }
+   while (time<=tmax) {
+      if (time<0.1) dt = 1e-3;
+      else if (time<0.5) dt = 5e-3;
+      else if (time<1.0) dt = 1e-2;
+      else if (time<4.0) dt = 5e-2;
+      else if (time<10.) dt = 1e-1;
+      else dt = 0.5;
 
-   dt = 1.e-1;
-   while (time>=1 && time<10) {
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      n1   += dNL1*dt;
-      n2   += dNL2*dt;
-      n3   += dNL3*dt;
-      time += dt;
-   }
-
-   dt = 1.;
-   while (time>=10 && time<=tmax) { // coarse step after 10 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       n1   += dNL1*dt;
       n2   += dNL2*dt;
@@ -513,36 +427,16 @@ Double_t NEUS::LivermoreModel::WilsonLe(Double_t *x, Double_t *parameter)
    Double_t dNL1, dNL2, dNL3;
 
    Double_t time = 1.2e-3; // start time
-
    Double_t dt = 1.e-3; // time interval [second]
-   while (time<0.1) { // fine step before 0.1 second
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      l1   += dNL1*dt*energy*1.60217646e-6;
-      l2   += dNL2*dt*energy*1.60217646e-6;
-      l3   += dNL3*dt*energy*1.60217646e-6;
-      time += dt;
-   }
 
-   dt = 1.e-2;
-   while (time>=0.1 && time<1) {
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      l1   += dNL1*dt*energy*1.60217646e-6;
-      l2   += dNL2*dt*energy*1.60217646e-6;
-      l3   += dNL3*dt*energy*1.60217646e-6;
-      time += dt;
-   }
+   while (time<=tmax) {
+      if (time<0.1) dt = 1e-3;
+      else if (time<0.5) dt = 5e-3;
+      else if (time<1.0) dt = 1e-2;
+      else if (time<4.0) dt = 5e-2;
+      else if (time<10.) dt = 1e-1;
+      else dt = 0.5;
 
-   dt = 1.e-1;
-   while (time>=1 && time<10) {
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      l1   += dNL1*dt*energy*1.60217646e-6;
-      l2   += dNL2*dt*energy*1.60217646e-6;
-      l3   += dNL3*dt*energy*1.60217646e-6;
-      time += dt;
-   }
-
-   dt = 1.;
-   while (time>=10 && time<=tmax) { // coarse step after 10 second
       wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
       l1   += dNL1*dt*energy*1.60217646e-6;
       l2   += dNL2*dt*energy*1.60217646e-6;
