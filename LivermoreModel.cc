@@ -574,7 +574,7 @@ TF2* NEUS::LivermoreModel::FL2(UShort_t type)
             "luminosity of #bar{#nu}_{e} [10^{50}/second/erg];time [second];energy [MeV]");
       fL2[type]->SetLineColor(kRed);
    } else {
-      fN2[type]->SetTitle(
+      fL2[type]->SetTitle(
             "luminosity of #nu_{x} [10^{50}/second/erg];time [second];energy [MeV]");
       fL2[type]->SetLineColor(kBlue);
    }
