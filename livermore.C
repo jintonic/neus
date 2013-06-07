@@ -26,6 +26,7 @@ int main()
    TCanvas *can = new TCanvas;
    can->Print("livermore.ps[");
 
+   sn->SetNbinsT(200);
    can->SetLogz();
    sn->FN2(1)->Draw("colz");
    can->Print("livermore.ps");
