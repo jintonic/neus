@@ -31,6 +31,7 @@ int main()
    can->Print("livermore.ps");
 
    // N(E) in 17.9012 second
+   sn->SetNbinsE(200);
    can->SetLogy(); // set before creating histograms
    TH1D *hNe1 = sn->HNe(1);
    TH1D *hNe2 = sn->HNe(2);
@@ -59,17 +60,16 @@ int main()
    can->Print("livermore.ps");
 
    // L(t)
-   sn->FLt(1)->SetNpx(1000); // set # of bins of histogram
-   sn->FLt(3)->SetNpx(1000);
-   sn->FLt(2)->SetNpx(1000);
-   can->SetLogy(0); // set before creating histograms
+   sn->SetNbinsT(1000); // set nbins
+   can->SetLogx(); // set before creating histograms
+   can->SetLogy(); // set before creating histograms
 
-   TH1D *hLt1 = sn->HLt(1);
+   TH1D *hLt1 = sn->HLt(1); // create internal histogram
    TH1D *hLt2 = sn->HLt(2);
    TH1D *hLt3 = sn->HLt(3);
 
-   hLt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
-   hLt1->GetYaxis()->SetRangeUser(0,1000);
+   hLt1->GetXaxis()->SetRangeUser(0.0212,17.9012);
+   hLt1->GetYaxis()->SetRangeUser(3,1e4);
    hLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
    hLt1->SetTitle(sn->GetTitle());
    hLt1->Draw();
@@ -85,20 +85,14 @@ int main()
    leg->Draw();
    can->Print("livermore.ps");
 
-   sn->FLt(1)->Update(); // delete internal histogram
-   sn->FLt(2)->Update(); // delete internal histogram
-   sn->FLt(3)->Update(); // delete internal histogram
-   can->SetLogx(); // set before creating histograms
-   can->SetLogy(); // set before creating histograms
+   // draw linear scale after log scale
+   // the x axis is still binned in log scale,
+   // it looks better also in linear scale
+   can->SetLogx(0);
+   can->SetLogy(0);
 
-   hLt1 = sn->HLt(1);
-   hLt2 = sn->HLt(2);
-   hLt3 = sn->HLt(3);
-
-   hLt1->GetXaxis()->SetRangeUser(0.0212,17.9012);
-   hLt1->GetYaxis()->SetRangeUser(3,1e4);
-   hLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
-   hLt1->SetTitle(sn->GetTitle());
+   hLt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
+   hLt1->GetYaxis()->SetRangeUser(0,1000);
    hLt1->Draw();
    hLt2->Draw("same");
    hLt3->Draw("same");
@@ -107,9 +101,7 @@ int main()
    can->Print("livermore.ps");
 
    // <E>(t)
-   sn->FEt(1)->SetNpx(1000); // set # of bins of histogram
-   sn->FEt(3)->SetNpx(1000);
-   sn->FEt(2)->SetNpx(1000);
+   sn->SetNbinsT(1000);
    can->SetLogx(1); // set before creating histograms
    can->SetLogy(0); // set before creating histograms
 
@@ -129,19 +121,14 @@ int main()
    leg->Draw();
    can->Print("livermore.ps");
 
-   sn->FEt(1)->Update(); // delete internal histogram
-   sn->FEt(2)->Update(); // delete internal histogram
-   sn->FEt(3)->Update(); // delete internal histogram
+   // draw linear scale after log scale
+   // the x axis is still binned in log scale,
+   // it looks better also in linear scale
    can->SetLogx(0); // set before creating histograms
    can->SetLogy(0); // set before creating histograms
 
-   hEt1 = sn->HEt(1);
-   hEt2 = sn->HEt(2);
-   hEt3 = sn->HEt(3);
-
    hEt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
    hEt1->GetYaxis()->SetRangeUser(5,27);
-   hEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
    hEt1->Draw();
    hEt2->Draw("same");
    hEt3->Draw("same");
