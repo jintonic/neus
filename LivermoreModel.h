@@ -52,7 +52,7 @@ class NEUS::LivermoreModel : public SupernovaModel
        */
       void UseDivariData();
       /**
-       * Clear Divari data.
+       * Clear internal data.
        */
       void Clear(Option_t *option="");
 
@@ -64,7 +64,7 @@ class NEUS::LivermoreModel : public SupernovaModel
       Double_t Eave(UShort_t type);
 
       TH2D* HN2(UShort_t type=1);
-      TH1D* HNt(UShort_t type=1);
+      TH1D* HNt(UShort_t type=1, Double_t emax=99);
       /**
        * Number of neutrinos integrated from [TMin(), tmax]
        * If tmax>TMax(), tmax is set to be TMax().
@@ -73,20 +73,20 @@ class NEUS::LivermoreModel : public SupernovaModel
       TH1D* HNe(UShort_t type=1, Double_t tmax=20);
 
       TH2D* HL2(UShort_t type=1);
-      TH1D* HLt(UShort_t type=1);
+      TH1D* HLt(UShort_t type=1, Double_t emax=99);
       TH1D* HLe(UShort_t type=1, Double_t tmax=20);
 
-      TH1D* HEt(UShort_t type=1);
+      TH1D* HEt(UShort_t type=1, Double_t emax=99);
 
       TF2* FN2(UShort_t type=1);
-      TF1* FNt(UShort_t type=1);
+      TF1* FNt(UShort_t type=1, Double_t emax=99);
       TF1* FNe(UShort_t type=1, Double_t tmax=20);
 
       TF2* FL2(UShort_t type=1);
-      TF1* FLt(UShort_t type=1);
+      TF1* FLt(UShort_t type=1, Double_t emax=99);
       TF1* FLe(UShort_t type=1, Double_t tmax=20);
 
-      TF1* FEt(UShort_t type=1);
+      TF1* FEt(UShort_t type=1, Double_t emax=99);
 
       /**
        * Set number of bins in energy axis.
