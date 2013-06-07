@@ -91,7 +91,11 @@ class NEUS::SupernovaModel : public TNamed
        * z axis: number of neutrinos in unit of 1e50/MeV/second.
        */
       virtual TH2D* HN2(UShort_t type) { return 0; }
-      virtual TH1D* HNt(UShort_t type) { return 0; } // N(t)
+      /**
+       * Number of neutrinos integrated from [EMin(), emax]
+       * If emax>EMax(), emax is set to be EMax().
+       */
+      virtual TH1D* HNt(UShort_t type, Double_t emax) { return 0; } // N(t)
       /**
        * Number of neutrinos integrated from [TMin(), tmax]
        * If tmax>TMax(), tmax is set to be TMax().
@@ -108,15 +112,16 @@ class NEUS::SupernovaModel : public TNamed
        * z axis: luminosity of neutrinos in unit of 1e50*erg/MeV/second.
        */
       virtual TH2D* HL2(UShort_t type) { return 0; }
-      virtual TH1D* HLt(UShort_t type) { return 0; } // L(t)
+      virtual TH1D* HLt(UShort_t type, Double_t emax) { return 0; } // L(t)
       virtual TH1D* HLe(UShort_t type, Double_t tmax) { return 0; } // L(E)
 
       /**
        * Average energy of neutrinos in TH1D format.
+       * The average is calculated in [Emin(), emax].
        * x axis: second after the core collapse, in [TMin(), TMax()].
        * y axis: average energy in unit of MeV/second.
        */
-      virtual TH1D* HEt(UShort_t type) { return 0; } // <E>(t)
+      virtual TH1D* HEt(UShort_t type, Double_t emax) { return 0; } // <E>(t)
 
       ClassDef(SupernovaModel,1);
 };
