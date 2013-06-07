@@ -58,7 +58,7 @@ class NEUS::NakazatoModel : public SupernovaModel
       Double_t Eave(UShort_t type);
 
       TH2D* HN2(UShort_t type=1);
-      TH1D* HNt(UShort_t type=1);
+      TH1D* HNt(UShort_t type=1, Double_t emax=99);
       /**
        * Number of neutrinos integrated from [TMin(), tmax]
        * If tmax>TMax(), tmax is set to be TMax().
@@ -67,10 +67,10 @@ class NEUS::NakazatoModel : public SupernovaModel
       TH1D* HNe(UShort_t type=1, Double_t tmax=0);
 
       TH2D* HL2(UShort_t type=1);
-      TH1D* HLt(UShort_t type=1);
+      TH1D* HLt(UShort_t type=1, Double_t emax=99);
       TH1D* HLe(UShort_t type=1, Double_t tmax=0);
 
-      TH1D* HEt(UShort_t type=1);
+      TH1D* HEt(UShort_t type=1, Double_t emax=99);
 
       void Print();
 
