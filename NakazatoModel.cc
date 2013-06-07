@@ -523,13 +523,15 @@ TH1D* NEUS::NakazatoModel::HLe(UShort_t type, Double_t tmax)
 //______________________________________________________________________________
 //
 
-TH1D* NEUS::NakazatoModel::HNt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HNt(UShort_t type, Double_t emax)
 {
    if (type<1 || type>6) {
       Warning("HNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
       Warning("HNt","NULL pointer is returned!");
       return NULL;
    }
+   if (emax>fMaxE) emax=fMaxE;
+
    if (!fHN2[type]) {
       Warning("HNt","Spectrum does not exist!");
       Warning("HNt","Is the database correctly loaded?");
@@ -547,9 +549,11 @@ TH1D* NEUS::NakazatoModel::HNt(UShort_t type)
    // calculate integral
    for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
       Double_t content=0;
-      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++)
+      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
          content += fHN2[type]->GetBinContent(ix,iy) *
             fHN2[type]->GetYaxis()->GetBinWidth(iy);
+      }
       fHNt[type]->SetBinContent(ix,content);
    }
    return fHNt[type];
@@ -558,13 +562,15 @@ TH1D* NEUS::NakazatoModel::HNt(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH1D* NEUS::NakazatoModel::HLt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HLt(UShort_t type, Double_t emax)
 {
    if (type<1 || type>6) {
       Warning("HLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
       Warning("HLt","NULL pointer is returned!");
       return NULL;
    }
+   if (emax>fMaxE) emax=fMaxE;
+
    if (!fHL2[type]) {
       Warning("HLt","Spectrum does not exist!");
       Warning("HLt","Is the database correctly loaded?");
@@ -583,9 +589,11 @@ TH1D* NEUS::NakazatoModel::HLt(UShort_t type)
    // calculate integral
    for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
       Double_t content=0;
-      for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++)
+      for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
+         if (emax<fHL2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
          content += fHL2[type]->GetBinContent(ix,iy) *
             fHL2[type]->GetYaxis()->GetBinWidth(iy);
+      }
       fHLt[type]->SetBinContent(ix,content);
    }
    return fHLt[type];
@@ -594,13 +602,15 @@ TH1D* NEUS::NakazatoModel::HLt(UShort_t type)
 //______________________________________________________________________________
 //
 
-TH1D* NEUS::NakazatoModel::HEt(UShort_t type)
+TH1D* NEUS::NakazatoModel::HEt(UShort_t type, Double_t emax)
 {
    if (type<1 || type>6) {
       Warning("HEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
       Warning("HEt","NULL pointer is returned!");
       return NULL;
    }
+   if (emax>fMaxE) emax=fMaxE;
+
    if (!fHN2[type]) {
       Warning("HEt","Spectrum does not exist!");
       Warning("HEt","Is the database correctly loaded?");
@@ -620,6 +630,7 @@ TH1D* NEUS::NakazatoModel::HEt(UShort_t type)
    for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
       Double_t totalE=0, totalN=0;
       for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
          totalN += fHN2[type]->GetBinContent(ix,iy) *
             fHN2[type]->GetYaxis()->GetBinWidth(iy);
          totalE += fHN2[type]->GetBinContent(ix,iy) * 
