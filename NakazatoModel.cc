@@ -24,32 +24,17 @@ NEUS::NakazatoModel::NakazatoModel(
       fName = Form("model%.0f1%.0f",fInitialMass,fReviveTime/100);
       fTitle = Form("%.0f Solar mass, 0.004, %.0f ms",fInitialMass,fReviveTime);
    }
-
-   for (UShort_t i=0; i<fgNtype; i++) {
-      fHN2[i]=NULL;
-      fHL2[i]=NULL;
-      fHNe[i]=NULL;
-      fHNt[i]=NULL;
-      fHLe[i]=NULL;
-      fHLt[i]=NULL;
-      fHEt[i]=NULL;
-   }
 }
 
 //______________________________________________________________________________
 //
 
-NEUS::NakazatoModel::~NakazatoModel()
+void NEUS::NakazatoModel::LoadData(const char *dir)
 {
-   for (UShort_t i=0; i<fgNtype; i++) {
-      if (fHN2[i]) delete fHN2[i];
-      if (fHL2[i]) delete fHL2[i];
-      if (fHNe[i]) delete fHNe[i];
-      if (fHNt[i]) delete fHNt[i];
-      if (fHLe[i]) delete fHLe[i];
-      if (fHLt[i]) delete fHLt[i];
-      if (fHEt[i]) delete fHEt[i];
-   }
+   SupernovaModel::LoadData(dir); // set fDataLocation
+   LoadIntegratedData();
+   // no full data for the black hole
+   if (fInitialMass!=30 || fMetallicity>0.01) LoadFullData();
 }
 
 //______________________________________________________________________________
@@ -98,16 +83,15 @@ void NEUS::NakazatoModel::LoadIntegratedData()
 
    fMinE = binEdges[0];
    fMaxE = binEdges[fNbinsE];
+   fMaxT = 20.5; // used to set title of histograms for identification
 
    // fill spectra
    for (UShort_t i=1; i<=3; i++) {
-      fHNe[i] = new TH1D(Form("hNe%d%.0f%.0f%.0f",i,
-               fInitialMass,fMetallicity*1000,fReviveTime/100),
-            ";neutrino energy [MeV];",fNbinsE,binEdges);
+      fHNe[i] = new TH1D(Form("hNe%s%d%f", GetName(), i,fMaxT),
+            ";energy [MeV];number of neutrinos [10^{50}/MeV]",fNbinsE,binEdges);
 
-      fHLe[i] = new TH1D(Form("hLe%d%.0f%.0f%.0f",i,
-               fInitialMass,fMetallicity*1000,fReviveTime/100),
-            ";neutrino energy [MeV];",fNbinsE,binEdges);
+      fHLe[i] = new TH1D(Form("hLe%s%d%f", GetName(), i,fMaxT),
+            ";energy [MeV];luminosity [10^{50} erg/MeV]",fNbinsE,binEdges);
    }
    for (UShort_t i=4; i<=6; i++) {
       fHNe[i]=fHNe[3];
@@ -125,33 +109,13 @@ void NEUS::NakazatoModel::LoadIntegratedData()
    }
 
    // set properties
-   fHNe[1]->GetYaxis()->SetTitle("number of #nu_{e} [10^{50}/MeV]");
-   fHNe[2]->GetYaxis()->SetTitle("number of #bar{#nu}_{e} [10^{50}/MeV]");
-   fHNe[3]->GetYaxis()->SetTitle("number of #nu_{x} [10^{50}/MeV]");
+   fHNe[1]->SetTitle(GetTitle());
+   fHNe[2]->SetTitle(GetTitle());
+   fHNe[3]->SetTitle(GetTitle());
 
-   fHLe[1]->GetYaxis()->SetTitle("luminosity of #nu_{e} [10^{50} erg/MeV]");
-   fHLe[2]->GetYaxis()->SetTitle("luminosity of #bar{#nu}_{e} [10^{50} erg/MeV]");
-   fHLe[3]->GetYaxis()->SetTitle("luminosity of #nu_{x} [10^{50} erg/MeV]");
-
-   fHNe[1]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHNe[2]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHNe[3]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-
-   fHLe[1]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHLe[2]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHLe[3]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
+   fHLe[1]->SetTitle(GetTitle());
+   fHLe[2]->SetTitle(GetTitle());
+   fHLe[3]->SetTitle(GetTitle());
 
    fHNe[1]->SetStats(0);
    fHNe[2]->SetStats(0);
@@ -267,12 +231,12 @@ void NEUS::NakazatoModel::LoadFullData()
    for (UShort_t i=1; i<=3; i++) {
       fHN2[i] = new TH2D(Form("hN2%d%.0f%.0f%.0f", i,
                fInitialMass,fMetallicity*1000,fReviveTime/100),
-            ";time [second];neutrino energy [MeV];",
+            ";time [second];energy [MeV];",
             fNbinsT,binEdgesx,fNbinsE,binEdgesy);
 
       fHL2[i] = new TH2D(Form("hL2%d%.0f%.0f%.0f", i,
                fInitialMass,fMetallicity*1000,fReviveTime/100),
-            ";time [second];neutrino energy [MeV];",
+            ";time [second];energy [MeV];",
             fNbinsT,binEdgesx,fNbinsE,binEdgesy);
    }
    for (UShort_t i=4; i<=6; i++) {
@@ -302,25 +266,29 @@ void NEUS::NakazatoModel::LoadFullData()
    fHL2[2]->GetZaxis()->SetTitle("luminosity of #bar{#nu}_{e} [10^{50} erg/s/MeV]");
    fHL2[3]->GetZaxis()->SetTitle("luminosity of #nu_{x} [10^{50} erg/s/MeV]");
 
-   fHN2[1]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHN2[2]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHN2[3]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
+   fHN2[1]->GetZaxis()->SetTitleOffset(-0.5);
+   fHN2[2]->GetZaxis()->SetTitleOffset(-0.5);
+   fHN2[3]->GetZaxis()->SetTitleOffset(-0.5);
 
-   fHL2[1]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHL2[2]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
-   fHL2[3]->SetTitle(Form(
-            "progenitor: %.0f Solar mass, metallicity: %.3f, revive time: %.0f ms",
-            fInitialMass, fMetallicity, fReviveTime));
+   fHL2[1]->GetZaxis()->SetTitleOffset(-0.5);
+   fHL2[2]->GetZaxis()->SetTitleOffset(-0.5);
+   fHL2[3]->GetZaxis()->SetTitleOffset(-0.5);
+
+   fHN2[1]->GetZaxis()->CenterTitle();
+   fHN2[2]->GetZaxis()->CenterTitle();
+   fHN2[3]->GetZaxis()->CenterTitle();
+
+   fHL2[1]->GetZaxis()->CenterTitle();
+   fHL2[2]->GetZaxis()->CenterTitle();
+   fHL2[3]->GetZaxis()->CenterTitle();
+
+   fHN2[1]->SetTitle(GetTitle());
+   fHN2[2]->SetTitle(GetTitle());
+   fHN2[3]->SetTitle(GetTitle());
+
+   fHL2[1]->SetTitle(GetTitle());
+   fHL2[2]->SetTitle(GetTitle());
+   fHL2[3]->SetTitle(GetTitle());
 
    fHN2[1]->SetStats(0);
    fHN2[2]->SetStats(0);
@@ -345,6 +313,14 @@ void NEUS::NakazatoModel::LoadFullData()
 Double_t NEUS::NakazatoModel::N2(UShort_t type, Double_t time, Double_t energy)
 {
    return HN2(type)->Interpolate(time, energy);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::NakazatoModel::L2(UShort_t type, Double_t time, Double_t energy)
+{
+   return HL2(type)->Interpolate(time, energy);
 }
 
 //______________________________________________________________________________
@@ -402,244 +378,8 @@ Double_t NEUS::NakazatoModel::Eave(UShort_t type)
       return 0;
    }
    if (abs(fAverageE[type]-1.0)<0.01)
-      fAverageE[type] = HLe(type)->Integral("width")/1.60217646e-6/Nall(type);
+      fAverageE[type] = Lall(type)/Nall(type)/1.60217646e-6;
    return fAverageE[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH2D* NEUS::NakazatoModel::HN2(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("HN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HN2","NULL pointer is returned!");
-      return NULL;
-   }
-   if (!fHN2[type]) {
-      Warning("HN2","Spectrum does not exist!");
-      Warning("HN2","Is the database correctly loaded?");
-      Warning("HN2","NULL pointer is returned!");
-   }
-   return fHN2[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH2D* NEUS::NakazatoModel::HL2(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("HL2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HL2","NULL pointer is returned!");
-      return NULL;
-   }
-   if (!fHL2[type]) {
-      Warning("HL2","Spectrum does not exist!");
-      Warning("HL2","Is the database correctly loaded?");
-      Warning("HL2","NULL pointer is returned!");
-   }
-   return fHL2[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NEUS::NakazatoModel::HNe(UShort_t type, Double_t tmax)
-{
-   if (type<1 || type>6) {
-      Warning("HNe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HNe","NULL pointer is returned!");
-      return NULL;
-   }
-   if (tmax==0) return fHNe[type]; // from database
-   if (tmax>fMaxT) tmax=fMaxT;
-
-   if (!fHNe[type]) {
-      Warning("HNe","Spectrum does not exist!");
-      Warning("HNe","Is the database correctly loaded?");
-      Warning("HNe","NULL pointer is returned!");
-      return NULL;
-   }
-
-   TH1D *h = (TH1D*) gDirectory->Get(Form("hNe%d%.0f%.0f%.0f%f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
-   if (h) return h; // from memory
-
-   // calculate integral in [0, tmax]
-   fHNe[type]->Reset();
-   for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
-      Double_t content=0;
-      for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
-         if (tmax<fHN2[type]->GetXaxis()->GetBinCenter(ix)) break;
-         content += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetXaxis()->GetBinWidth(ix);
-      }
-      fHNe[type]->SetBinContent(iy,content);
-   }
-   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax));
-   return fHNe[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NEUS::NakazatoModel::HLe(UShort_t type, Double_t tmax)
-{
-   if (type<1 || type>6) {
-      Warning("HLe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HLe","NULL pointer is returned!");
-      return NULL;
-   }
-   if (tmax==0) return fHLe[type]; // from database
-   if (tmax>fMaxT) tmax=fMaxT;
-
-   if (!fHLe[type]) {
-      Warning("HLe","Spectrum does not exist!");
-      Warning("HLe","Is the database correctly loaded?");
-      Warning("HLe","NULL pointer is returned!");
-      return NULL;
-   }
-
-   TH1D *h = (TH1D*) gDirectory->Get(Form("hLe%d%.0f%.0f%.0f%f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100,tmax));
-   if (h) return h; // from memory
-
-   // calculate integral in [0, tmax]
-   fHLe[type]->Reset();
-   for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
-      Double_t content=0;
-      for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
-         if (tmax<fHL2[type]->GetXaxis()->GetBinCenter(ix)) break;
-         content += fHL2[type]->GetBinContent(ix,iy) *
-            fHL2[type]->GetXaxis()->GetBinWidth(ix);
-      }
-      fHLe[type]->SetBinContent(iy,content);
-   }
-   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax));
-   return fHLe[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NEUS::NakazatoModel::HNt(UShort_t type, Double_t emax)
-{
-   if (type<1 || type>6) {
-      Warning("HNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HNt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (emax>fMaxE) emax=fMaxE;
-
-   if (!fHN2[type]) {
-      Warning("HNt","Spectrum does not exist!");
-      Warning("HNt","Is the database correctly loaded?");
-      Warning("HNt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (fHNt[type]) return fHNt[type];
-
-   fHNt[type] = fHN2[type]->ProjectionX(Form("hNt%d%.0f%.0f%.0f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         1,1,"e");
-   fHNt[type]->Reset();
-   fHNt[type]->SetStats(0);
-
-   // calculate integral
-   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
-      Double_t content=0;
-      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
-         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         content += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetYaxis()->GetBinWidth(iy);
-      }
-      fHNt[type]->SetBinContent(ix,content);
-   }
-   return fHNt[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NEUS::NakazatoModel::HLt(UShort_t type, Double_t emax)
-{
-   if (type<1 || type>6) {
-      Warning("HLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HLt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (emax>fMaxE) emax=fMaxE;
-
-   if (!fHL2[type]) {
-      Warning("HLt","Spectrum does not exist!");
-      Warning("HLt","Is the database correctly loaded?");
-      Warning("HLt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (fHLt[type]) return fHLt[type];
-
-   fHLt[type] = fHL2[type]->ProjectionX(Form("hLt%d%.0f%.0f%.0f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         1,1,"e");
-   fHLt[type]->Reset();
-   fHLt[type]->SetStats(0);
-   fHLt[type]->GetYaxis()->SetTitle("Luminosity [10^{50} erg/second]");
-
-   // calculate integral
-   for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
-      Double_t content=0;
-      for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
-         if (emax<fHL2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         content += fHL2[type]->GetBinContent(ix,iy) *
-            fHL2[type]->GetYaxis()->GetBinWidth(iy);
-      }
-      fHLt[type]->SetBinContent(ix,content);
-   }
-   return fHLt[type];
-}
-
-//______________________________________________________________________________
-//
-
-TH1D* NEUS::NakazatoModel::HEt(UShort_t type, Double_t emax)
-{
-   if (type<1 || type>6) {
-      Warning("HEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HEt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (emax>fMaxE) emax=fMaxE;
-
-   if (!fHN2[type]) {
-      Warning("HEt","Spectrum does not exist!");
-      Warning("HEt","Is the database correctly loaded?");
-      Warning("HEt","NULL pointer is returned!");
-      return NULL;
-   }
-   if (fHEt[type]) return fHEt[type];
-
-   fHEt[type] = fHN2[type]->ProjectionX(Form("hEt%d%.0f%.0f%.0f",type,
-            fInitialMass,fMetallicity*1000,fReviveTime/100),
-         1,1,"e");
-   fHEt[type]->Reset();
-   fHEt[type]->SetStats(0);
-   fHEt[type]->GetYaxis()->SetTitle("average neutrino energy [MeV/second]");
-
-   // calculate average
-   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
-      Double_t totalE=0, totalN=0;
-      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
-         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         totalN += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetYaxis()->GetBinWidth(iy);
-         totalE += fHN2[type]->GetBinContent(ix,iy) * 
-            fHN2[type]->GetYaxis()->GetBinWidth(iy) *
-            fHN2[type]->GetYaxis()->GetBinCenter(iy);
-      }
-      fHEt[type]->SetBinContent(ix,totalE/totalN);
-   }
-   return fHEt[type];
 }
 
 //______________________________________________________________________________
