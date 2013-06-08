@@ -83,11 +83,11 @@ void NEUS::NakazatoModel::LoadIntegratedData()
 
    fMinE = binEdges[0];
    fMaxE = binEdges[fNbinsE];
-   fMaxT = 20.5; // used to set title of histograms for identification
+   fMaxT = 20.125; // used to set title of histograms for identification
 
    // fill spectra
    for (UShort_t i=1; i<=3; i++) {
-      fHNe[i] = new TH1D(Form("hNe%s%d%f", GetName(), i,fMaxT),
+      fHNe[i] = new TH1D(Form("hNe%s%d%f", GetName(), i, fMaxT),
             ";energy [MeV];number of neutrinos [10^{50}/MeV]",fNbinsE,binEdges);
 
       fHLe[i] = new TH1D(Form("hLe%s%d%f", GetName(), i,fMaxT),
