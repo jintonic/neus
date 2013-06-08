@@ -3,7 +3,6 @@ using namespace NEUS;
 
 #include <TF1.h>
 #include <TH2D.h>
-#include <TFile.h>
 #include <TROOT.h>
 #include <TCanvas.h>
 #include <TLegend.h>
@@ -26,18 +25,19 @@ int main()
 
    for (UShort_t i=0; i<nm; i++) {
       model[i] = new NakazatoModel(mass[i],meta[i],trev[i]);
-      model[i]->SetDataLocation(".");
-      model[i]->LoadIntegratedData();
-      model[i]->LoadFullData();
+      model[i]->LoadData(".");
    }
 
    NakazatoModel *blackHole = new NakazatoModel(30,0.004);
-   blackHole->SetDataLocation(".");
-   blackHole->LoadIntegratedData();
+   blackHole->LoadData(".");
 
-   // draw
+   // draw spectra
    TCanvas *can = new TCanvas;
    can->Print("nakazato.ps[");
+
+   can->SetLogz();
+   model[14]->HN2(1)->Draw("colz");
+   can->Print("nakazato.ps");
 
    // N(E) in 20 second
    TH1D *hNe1 = model[14]->HNe(1);
