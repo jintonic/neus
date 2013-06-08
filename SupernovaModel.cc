@@ -1,6 +1,7 @@
 #include "SupernovaModel.h"
 
 #include <TF1.h>
+#include <TH2D.h>
 #include <TAxis.h>
 
 #include <cmath>
@@ -16,7 +17,14 @@ NEUS::SupernovaModel::SupernovaModel() : TNamed(), fDataLocation(),
       fTotalN[i] = 0;
       fTotalL[i] = 0;
       fAverageE[i] = 1.0; // 0 cannot be in the denominator
-      fNeFD[i] = NULL;
+      fHN2[i] = 0;
+      fHL2[i] = 0;
+      fHNe[i] = 0;
+      fHNt[i] = 0;
+      fHLe[i] = 0;
+      fHLt[i] = 0;
+      fHEt[i] = 0;
+      fNeFD[i]= 0;
    }
 }
 
@@ -29,17 +37,44 @@ NEUS::SupernovaModel::SupernovaModel(const char *name, const char *title) :
    for (UShort_t i=0; i<fgNtype; i++) {
       fTotalN[i] = 0;
       fTotalL[i] = 0;
-      fAverageE[i] = 1;
-      fNeFD[i] = NULL;
+      fAverageE[i] = 1.0;
+      fHN2[i] = 0;
+      fHL2[i] = 0;
+      fHNe[i] = 0;
+      fHNt[i] = 0;
+      fHLe[i] = 0;
+      fHLt[i] = 0;
+      fHEt[i] = 0;
+      fNeFD[i]= 0;
    }
 }
 
 //______________________________________________________________________________
 //
 
-NEUS::SupernovaModel::~SupernovaModel()
+void NEUS::SupernovaModel::Clear(Option_t *option)
 {
-   for (UShort_t i=0; i<fgNtype; i++) if (fNeFD[i]) delete fNeFD[i];
+   for (UShort_t i=0; i<fgNtype; i++) {
+      fTotalN[i] = 0;
+      fTotalL[i] = 0;
+      fAverageE[i] = 1.; // 0 cannot be in the denominator
+      if (fNeFD[i]) delete fNeFD[i];
+      if (fHN2[i]) delete fHN2[i];
+      if (fHL2[i]) delete fHL2[i];
+      if (fHNe[i]) delete fHNe[i];
+      if (fHNt[i]) delete fHNt[i];
+      if (fHLe[i]) delete fHLe[i];
+      if (fHLt[i]) delete fHLt[i];
+      if (fHEt[i]) delete fHEt[i];
+      fHN2[i] = 0;
+      fHL2[i] = 0;
+      fHNe[i] = 0;
+      fHNt[i] = 0;
+      fHLe[i] = 0;
+      fHLt[i] = 0;
+      fHEt[i] = 0;
+      fNeFD[i] = 0;
+   }
 }
 
 //______________________________________________________________________________
@@ -47,11 +82,6 @@ NEUS::SupernovaModel::~SupernovaModel()
 
 Double_t NEUS::SupernovaModel::NeFD(UShort_t type, Double_t energy)
 {
-   if (type<1 || type>6) {
-      Warning("NeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("NeFD","0 is returned!");
-      return 0;
-   }
    Double_t co = 0.55 * Nall(type); // coefficient
    Double_t kT = Eave(type)*2/6.; // <E> = NDF*kT/2 => kT = <E>*2/NDF
    return co/kT/kT/kT * energy*energy/(1.+exp(energy/kT));
@@ -75,13 +105,12 @@ TF1* NEUS::SupernovaModel::FNeFD(UShort_t type)
    if (type<1 || type>6) {
       Warning("HNeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
       Warning("HNeFD","NULL pointer is returned!");
-      return NULL;
+      return 0;
    }
    if (fNeFD[type]) return fNeFD[type];
 
-   fNeFD[type] = new TF1(Form("fNeFD%d",type), this, 
-         &SupernovaModel::NeFermiDirac,
-         fMinE, fMaxE, 1, "SupernovaModel", "HNeFD");
+   fNeFD[type] = new TF1(Form("fNeFD%d",type), this,
+         &SupernovaModel::NeFermiDirac, fMinE, fMaxE, 1);
    fNeFD[type]->SetParameter(0,type);
 
    // fHistogram in TF1 has not yet been created at this moment,
@@ -115,3 +144,289 @@ TH1D* NEUS::SupernovaModel::HNeFD(UShort_t type)
 {
    return (TH1D*) FNeFD(type)->GetHistogram();
 }
+
+//______________________________________________________________________________
+//
+
+TH2D* NEUS::SupernovaModel::HN2(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HN2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HN2","NULL pointer is returned!");
+      return 0;
+   }
+   if (!fHN2[type]) {
+      Warning("HN2","Spectrum does not exist!");
+      Warning("HN2","Is the database correctly loaded?");
+      Warning("HN2","NULL pointer is returned!");
+   }
+   return fHN2[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH2D* NEUS::SupernovaModel::HL2(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("HL2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HL2","NULL pointer is returned!");
+      return 0;
+   }
+   if (!fHL2[type]) {
+      Warning("HL2","Spectrum does not exist!");
+      Warning("HL2","Is the database correctly loaded?");
+      Warning("HL2","NULL pointer is returned!");
+   }
+   return fHL2[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
+{
+   if (type<1 || type>6) {
+      Warning("HNe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HNe","NULL pointer is returned!");
+      return 0;
+   }
+   if (tmax>fMaxT) tmax=fMaxT;
+
+   if (!fHN2[type]) {
+      Warning("HNe","Spectrum does not exist!");
+      Warning("HNe","Is the database correctly loaded?");
+      Warning("HNe","NULL pointer is returned!");
+      return 0;
+   }
+
+   TString name = Form("hNe%s%d%f", GetName(), type, tmax);
+   if (fHNe[type]) {
+      if (name.CompareTo(fHNe[type]->GetName())==0) return fHNe[type];
+      else fHNe[type]->Reset();
+   } else {
+      fHNe[type] = new TH1D(name.Data(),
+            ";energy [MeV];number of neutrinos [10^{50}/MeV]",
+            fHN2[type]->GetNbinsY(),
+            fHN2[type]->GetYaxis()->GetXbins()->GetArray());
+      fHNe[type]->SetStats(0);
+      fHNe[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHNe[type]->SetTitle(GetTitle());
+   }
+
+   // calculate integral in [0, tmax]
+   for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+      Double_t content=0;
+      for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
+         if (tmax<fHN2[type]->GetXaxis()->GetBinCenter(ix)) break;
+         content += fHN2[type]->GetBinContent(ix,iy) *
+            fHN2[type]->GetXaxis()->GetBinWidth(ix);
+      }
+      fHNe[type]->SetBinContent(iy,content);
+   }
+   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax));
+   return fHNe[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
+{
+   if (type<1 || type>6) {
+      Warning("HLe","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HLe","NULL pointer is returned!");
+      return 0;
+   }
+   if (tmax>fMaxT) tmax=fMaxT;
+
+   if (!fHL2[type]) {
+      Warning("HLe","Spectrum does not exist!");
+      Warning("HLe","Is the database correctly loaded?");
+      Warning("HLe","NULL pointer is returned!");
+      return 0;
+   }
+
+   TString name = Form("hLe%s%d%f", GetName(), type, tmax);
+   if (fHLe[type]) {
+      if (name.CompareTo(fHLe[type]->GetName())==0) return fHLe[type];
+      else fHLe[type]->Reset();
+   } else {
+      fHLe[type] = new TH1D(name.Data(),
+            ";energy [MeV];luminosity [10^{50} erg/MeV]",
+            fHN2[type]->GetNbinsY(),
+            fHN2[type]->GetYaxis()->GetXbins()->GetArray());
+      fHLe[type]->SetStats(0);
+      fHLe[type]->SetLineColor(fHL2[type]->GetLineColor());
+      fHLe[type]->SetTitle(GetTitle());
+   }
+
+   // calculate integral in [0, tmax]
+   for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
+      Double_t content=0;
+      for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
+         if (tmax<fHL2[type]->GetXaxis()->GetBinCenter(ix)) break;
+         content += fHL2[type]->GetBinContent(ix,iy) *
+            fHL2[type]->GetXaxis()->GetBinWidth(ix);
+      }
+      fHLe[type]->SetBinContent(iy,content);
+   }
+   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax));
+   return fHLe[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t emax)
+{
+   if (type<1 || type>6) {
+      Warning("HNt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HNt","NULL pointer is returned!");
+      return 0;
+   }
+   if (emax>fMaxE) emax=fMaxE;
+
+   if (!fHN2[type]) {
+      Warning("HNt","Spectrum does not exist!");
+      Warning("HNt","Is the database correctly loaded?");
+      Warning("HNt","NULL pointer is returned!");
+      return 0;
+   }
+
+   TString name = Form("hNt%s%d%f", GetName(), type, emax);
+   if (fHNt[type]) {
+     if (name.CompareTo(fHNt[type]->GetName())==0) return fHNt[type];
+     else fHNt[type]->Reset();
+   } else {
+      fHNt[type] = new TH1D(name.Data(),
+            ";time [second];number of neutrinos [10^{50}/second]",
+            fHN2[type]->GetNbinsX(),
+            fHN2[type]->GetXaxis()->GetXbins()->GetArray());
+      fHNt[type]->SetStats(0);
+      fHNt[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHNt[type]->SetTitle(GetTitle());
+   }
+
+   // calculate integral
+   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
+      Double_t content=0;
+      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
+         content += fHN2[type]->GetBinContent(ix,iy) *
+            fHN2[type]->GetYaxis()->GetBinWidth(iy);
+      }
+      fHNt[type]->SetBinContent(ix,content);
+   }
+   return fHNt[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t emax)
+{
+   if (type<1 || type>6) {
+      Warning("HLt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HLt","NULL pointer is returned!");
+      return 0;
+   }
+   if (emax>fMaxE) emax=fMaxE;
+
+   if (!fHL2[type]) {
+      Warning("HLt","Spectrum does not exist!");
+      Warning("HLt","Is the database correctly loaded?");
+      Warning("HLt","NULL pointer is returned!");
+      return 0;
+   }
+
+   TString name = Form("hLt%s%d%f", GetName(), type, emax);
+   if (fHLt[type]) {
+      if (name.CompareTo(fHLt[type]->GetName())==0) return fHLt[type];
+      else fHLt[type]->Reset();
+   } else {
+      fHLt[type] = new TH1D(name.Data(),
+            ";time [second];luminosity [10^{50} erg/second]",
+            fHL2[type]->GetNbinsX(),
+            fHL2[type]->GetXaxis()->GetXbins()->GetArray());
+      fHLt[type]->SetStats(0);
+      fHLt[type]->SetLineColor(fHL2[type]->GetLineColor());
+      fHLt[type]->SetTitle(GetTitle());
+   }
+
+   // calculate integral
+   for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
+      Double_t content=0;
+      for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
+         if (emax<fHL2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
+         content += fHL2[type]->GetBinContent(ix,iy) *
+            fHL2[type]->GetYaxis()->GetBinWidth(iy);
+      }
+      fHLt[type]->SetBinContent(ix,content);
+   }
+   return fHLt[type];
+}
+
+//______________________________________________________________________________
+//
+
+TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
+{
+   if (type<1 || type>6) {
+      Warning("HEt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("HEt","NULL pointer is returned!");
+      return 0;
+   }
+   if (emax>fMaxE) emax=fMaxE;
+
+   if (!fHN2[type]) {
+      Warning("HEt","Spectrum does not exist!");
+      Warning("HEt","Is the database correctly loaded?");
+      Warning("HEt","NULL pointer is returned!");
+      return 0;
+   }
+
+   TString name = Form("hEt%s%d%f", GetName(), type, emax);
+   if (fHEt[type]) {
+      if (name.CompareTo(fHEt[type]->GetName())==0) return fHEt[type];
+      else fHEt[type]->Reset();
+   } else {
+      fHEt[type] = new TH1D(name.Data(),
+            ";time [second];average energy [MeV/second]",
+            fHN2[type]->GetNbinsX(),
+            fHN2[type]->GetXaxis()->GetXbins()->GetArray());
+      fHEt[type]->SetStats(0);
+      fHEt[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHEt[type]->SetTitle(GetTitle());
+   }
+
+   // calculate average
+   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
+      Double_t totalE=0, totalN=0;
+      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
+         totalN += fHN2[type]->GetBinContent(ix,iy) *
+            fHN2[type]->GetYaxis()->GetBinWidth(iy);
+         totalE += fHN2[type]->GetBinContent(ix,iy) * 
+            fHN2[type]->GetYaxis()->GetBinWidth(iy) *
+            fHN2[type]->GetYaxis()->GetBinCenter(iy);
+      }
+      fHEt[type]->SetBinContent(ix,totalE/totalN);
+   }
+   return fHEt[type];
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::Eave(UShort_t type)
+{
+   if (abs(fAverageE[type]-1.0)>0.01) return fAverageE[type];
+
+   fAverageE[type] = Lall(type)/Nall(type)/1.60217646e-6;
+
+   return fAverageE[type];
+}
+
+//______________________________________________________________________________
+//
