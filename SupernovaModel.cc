@@ -103,8 +103,8 @@ Double_t NEUS::SupernovaModel::NeFermiDirac(Double_t *x, Double_t *parameter)
 TF1* NEUS::SupernovaModel::FNeFD(UShort_t type)
 {
    if (type<1 || type>6) {
-      Warning("HNeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("HNeFD","NULL pointer is returned!");
+      Warning("FNeFD","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("FNeFD","NULL pointer is returned!");
       return 0;
    }
    if (fNeFD[type]) return fNeFD[type];
@@ -193,13 +193,6 @@ TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
    }
    if (tmax>fMaxT) tmax=fMaxT;
 
-   if (!fHN2[type]) {
-      Warning("HNe","Spectrum does not exist!");
-      Warning("HNe","Is the database correctly loaded?");
-      Warning("HNe","NULL pointer is returned!");
-      return 0;
-   }
-
    TString name = Form("hNe%s%d%f", GetName(), type, tmax);
    if (fHNe[type]) {
       if (name.CompareTo(fHNe[type]->GetName())==0) return fHNe[type];
@@ -224,7 +217,6 @@ TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
       }
       fHNe[type]->SetBinContent(iy,content);
    }
-   fHNe[type]->SetName(Form("%s%f",fHNe[type]->GetName(),tmax));
    return fHNe[type];
 }
 
@@ -239,13 +231,6 @@ TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
       return 0;
    }
    if (tmax>fMaxT) tmax=fMaxT;
-
-   if (!fHL2[type]) {
-      Warning("HLe","Spectrum does not exist!");
-      Warning("HLe","Is the database correctly loaded?");
-      Warning("HLe","NULL pointer is returned!");
-      return 0;
-   }
 
    TString name = Form("hLe%s%d%f", GetName(), type, tmax);
    if (fHLe[type]) {
@@ -271,7 +256,6 @@ TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
       }
       fHLe[type]->SetBinContent(iy,content);
    }
-   fHLe[type]->SetName(Form("%s%f",fHLe[type]->GetName(),tmax));
    return fHLe[type];
 }
 
@@ -286,13 +270,6 @@ TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t emax)
       return 0;
    }
    if (emax>fMaxE) emax=fMaxE;
-
-   if (!fHN2[type]) {
-      Warning("HNt","Spectrum does not exist!");
-      Warning("HNt","Is the database correctly loaded?");
-      Warning("HNt","NULL pointer is returned!");
-      return 0;
-   }
 
    TString name = Form("hNt%s%d%f", GetName(), type, emax);
    if (fHNt[type]) {
@@ -333,18 +310,12 @@ TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   if (!fHL2[type]) {
-      Warning("HLt","Spectrum does not exist!");
-      Warning("HLt","Is the database correctly loaded?");
-      Warning("HLt","NULL pointer is returned!");
-      return 0;
-   }
-
    TString name = Form("hLt%s%d%f", GetName(), type, emax);
    if (fHLt[type]) {
       if (name.CompareTo(fHLt[type]->GetName())==0) return fHLt[type];
       else fHLt[type]->Reset();
    } else {
+      Info("HEt", "Create HEt.");
       fHLt[type] = new TH1D(name.Data(),
             ";time [second];luminosity [10^{50} erg/second]",
             fHL2[type]->GetNbinsX(),
@@ -379,18 +350,12 @@ TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   if (!fHN2[type]) {
-      Warning("HEt","Spectrum does not exist!");
-      Warning("HEt","Is the database correctly loaded?");
-      Warning("HEt","NULL pointer is returned!");
-      return 0;
-   }
-
    TString name = Form("hEt%s%d%f", GetName(), type, emax);
    if (fHEt[type]) {
       if (name.CompareTo(fHEt[type]->GetName())==0) return fHEt[type];
       else fHEt[type]->Reset();
    } else {
+      Info("HEt", "Create HEt.");
       fHEt[type] = new TH1D(name.Data(),
             ";time [second];average energy [MeV/second]",
             fHN2[type]->GetNbinsX(),
