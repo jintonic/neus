@@ -1,21 +1,20 @@
 #include "LivermoreModel.h"
 using namespace NEUS;
 
-#include <TF2.h>
+#include <TF1.h>
 #include <TH2D.h>
 #include <TROOT.h>
 #include <TCanvas.h>
 #include <TLegend.h>
-#include <TStyle.h>
-#include <TColor.h>
 
 #include <iostream>
 using namespace std;
 
 int main()
 {
+   // load database
    LivermoreModel *sn = new LivermoreModel;
-   sn->SetDataLocation("../total");
+   sn->LoadData("../total");
 
    cout<<"average neutrino energy:"<<endl;
    cout<<"type 1: "<<sn->Eave(1)<<" MeV"<<endl;
@@ -26,21 +25,18 @@ int main()
    TCanvas *can = new TCanvas;
    can->Print("livermore.ps[");
 
-   sn->SetNbinsT(200);
    can->SetLogz();
-   sn->FN2(1)->Draw("colz");
+   sn->HN2(1)->Draw("colz");
    can->Print("livermore.ps");
 
    // N(E) in 17.9012 second
-   sn->SetNbinsE(200);
-   can->SetLogy(); // set before creating histograms
+   can->SetLogy();
    TH1D *hNe1 = sn->HNe(1);
    TH1D *hNe2 = sn->HNe(2);
    TH1D *hNex = sn->HNe(3);
 
    hNe1->GetXaxis()->SetRangeUser(0,60);
    hNe1->GetYaxis()->SetRangeUser(1e3,1e7);
-   hNe1->GetYaxis()->SetTitle("number of neutrino [10^{50}/MeV]");
    hNe1->Draw();
    hNe2->Draw("same");
    hNex->Draw("same");
@@ -61,18 +57,15 @@ int main()
    can->Print("livermore.ps");
 
    // L(t)
-   sn->SetNbinsT(1000); // set nbins
-   can->SetLogx(); // set before creating histograms
-   can->SetLogy(); // set before creating histograms
+   can->SetLogx();
+   can->SetLogy();
 
-   TH1D *hLt1 = sn->HLt(1); // create internal histogram
+   TH1D *hLt1 = sn->HLt(1);
    TH1D *hLt2 = sn->HLt(2);
    TH1D *hLt3 = sn->HLt(3);
 
    hLt1->GetXaxis()->SetRangeUser(0.0212,17.9012);
    hLt1->GetYaxis()->SetRangeUser(3,1e4);
-   hLt1->GetYaxis()->SetTitle("luminosity [10^{50} erg/second]");
-   hLt1->SetTitle(sn->GetTitle());
    hLt1->Draw();
    hLt2->Draw("same");
    hLt3->Draw("same");
@@ -86,9 +79,6 @@ int main()
    leg->Draw();
    can->Print("livermore.ps");
 
-   // draw linear scale after log scale
-   // the x axis is still binned in log scale,
-   // it looks better also in linear scale
    can->SetLogx(0);
    can->SetLogy(0);
 
@@ -102,9 +92,8 @@ int main()
    can->Print("livermore.ps");
 
    // <E>(t)
-   sn->SetNbinsT(1000);
-   can->SetLogx(1); // set before creating histograms
-   can->SetLogy(0); // set before creating histograms
+   can->SetLogx(1);
+   can->SetLogy(0);
 
    TH1D *hEt1 = sn->HEt(1);
    TH1D *hEt2 = sn->HEt(2);
@@ -112,21 +101,17 @@ int main()
 
    hEt1->GetXaxis()->SetRangeUser(2.5e-2,17);
    hEt1->GetYaxis()->SetRangeUser(5,30);
-   hEt1->GetYaxis()->SetTitle("average energy [MeV/second]");
    hEt1->Draw();
    hEt2->Draw("same");
    hEt3->Draw("same");
 
-   leg->SetX1NDC(0.3);
-   leg->SetX2NDC(0.5);
+   leg->SetX1NDC(0.25);
+   leg->SetX2NDC(0.45);
    leg->Draw();
    can->Print("livermore.ps");
 
-   // draw linear scale after log scale
-   // the x axis is still binned in log scale,
-   // it looks better also in linear scale
-   can->SetLogx(0); // set before creating histograms
-   can->SetLogy(0); // set before creating histograms
+   can->SetLogx(0);
+   can->SetLogy(0);
 
    hEt1->GetXaxis()->SetRangeUser(0.0012,1.5012);
    hEt1->GetYaxis()->SetRangeUser(5,27);
@@ -135,7 +120,7 @@ int main()
    hEt3->Draw("same");
 
    leg->SetX1NDC(0.15);
-   leg->SetX2NDC(0.35);
+   leg->SetX2NDC(0.30);
    leg->SetY1NDC(0.65);
    leg->SetY2NDC(0.88);
    leg->Draw();
