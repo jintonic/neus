@@ -18,19 +18,16 @@ int main()
 
    for (UShort_t i=0; i<nm; i++) {
       model[i] = new NakazatoModel(mass[i],meta[i],trev[i]);
-      model[i]->SetDataLocation(".");
-      model[i]->LoadIntegratedData();
-      model[i]->LoadFullData();
+      model[i]->LoadData(".");
       model[i]->Print();
    }
 
    NakazatoModel *blackHole = new NakazatoModel(30,0.004);
-   blackHole->SetDataLocation(".");
-   blackHole->LoadIntegratedData();
+   blackHole->LoadData(".");
    blackHole->Print();
 
    LivermoreModel *totani = new LivermoreModel;
-   totani->SetDataLocation("../total");
+   totani->LoadData("../total");
    totani->Print();
 
    TFile *output = new TFile("models.root","recreate");
