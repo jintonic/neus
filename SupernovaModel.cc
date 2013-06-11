@@ -193,12 +193,11 @@ TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
    }
    if (tmax>fMaxT) tmax=fMaxT;
 
-   TString name = Form("hNe%s-%d-%.4f", GetName(), type, tmax);
+   TString name = Form("hNe-%s-%d-%.4f", GetName(), type, tmax);
    if (fHNe[type]) {
       if (name.CompareTo(fHNe[type]->GetName())==0) return fHNe[type];
       else fHNe[type]->Reset();
    } else {
-      Info("HNe", "Create %s",name.Data());
       fHNe[type] = new TH1D(name.Data(),
             ";energy [MeV];number of neutrinos [10^{50}/MeV]",
             HN2(type)->GetNbinsY(),
@@ -233,16 +232,15 @@ TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
    }
    if (tmax>fMaxT) tmax=fMaxT;
 
-   TString name = Form("hLe%s-%d-%.4f", GetName(), type, tmax);
+   TString name = Form("hLe-%s-%d-%.4f", GetName(), type, tmax);
    if (fHLe[type]) {
       if (name.CompareTo(fHLe[type]->GetName())==0) return fHLe[type];
       else fHLe[type]->Reset();
    } else {
-      Info("HLe", "Create %s",name.Data());
       fHLe[type] = new TH1D(name.Data(),
             ";energy [MeV];luminosity [10^{50} erg/MeV]",
-            HN2(type)->GetNbinsY(),
-            HN2(type)->GetYaxis()->GetXbins()->GetArray());
+            HL2(type)->GetNbinsY(),
+            HL2(type)->GetYaxis()->GetXbins()->GetArray());
       fHLe[type]->SetStats(0);
       fHLe[type]->SetLineColor(HL2(type)->GetLineColor());
       fHLe[type]->SetTitle(GetTitle());
@@ -273,7 +271,7 @@ TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hNt%s-%d-%.1f", GetName(), type, emax);
+   TString name = Form("hNt-%s-%d-%.1f", GetName(), type, emax);
    if (fHNt[type]) {
      if (name.CompareTo(fHNt[type]->GetName())==0) return fHNt[type];
      else fHNt[type]->Reset();
@@ -313,7 +311,7 @@ TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hLt%s-%d-%.1f", GetName(), type, emax);
+   TString name = Form("hLt-%s-%d-%.1f", GetName(), type, emax);
    if (fHLt[type]) {
       if (name.CompareTo(fHLt[type]->GetName())==0) return fHLt[type];
       else fHLt[type]->Reset();
@@ -353,7 +351,7 @@ TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hEt%s-%d-%.1f", GetName(), type, emax);
+   TString name = Form("hEt-%s-%d-%.1f", GetName(), type, emax);
    if (fHEt[type]) {
       if (name.CompareTo(fHEt[type]->GetName())==0) return fHEt[type];
       else fHEt[type]->Reset();
@@ -389,12 +387,71 @@ TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
 
 Double_t NEUS::SupernovaModel::Eave(UShort_t type)
 {
-   if (abs(fAverageE[type]-1.0)>0.01) return fAverageE[type];
-
-   fAverageE[type] = Lall(type)/Nall(type)/1.60217646e-6;
-
+   if (abs(fAverageE[type]-1.0)<0.01)
+      fAverageE[type] = Lall(type)/Nall(type)/1.60217646e-6;
    return fAverageE[type];
 }
 
 //______________________________________________________________________________
 //
+
+Double_t NEUS::SupernovaModel::N2(UShort_t type, Double_t time, Double_t energy)
+{
+   return HN2(type)->Interpolate(time, energy);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::L2(UShort_t type, Double_t time, Double_t energy)
+{
+   return HL2(type)->Interpolate(time, energy);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::Ne(UShort_t type, Double_t energy)
+{
+   return HNe(type)->Interpolate(energy);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::Nt(UShort_t type, Double_t time)
+{
+   return HNt(type)->Interpolate(time);
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::Nall(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("Nall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("Nall","Return 0!");
+      return 0;
+   }
+   if (fTotalN[type]==0) fTotalN[type] = HNe(type)->Integral("width");
+   return fTotalN[type];
+}
+
+//______________________________________________________________________________
+//
+
+Double_t NEUS::SupernovaModel::Lall(UShort_t type)
+{
+   if (type<1 || type>6) {
+      Warning("Lall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
+      Warning("Lall","Return 0!");
+      return 0;
+   }
+   if (fTotalL[type]==0) fTotalL[type] = HLe(type)->Integral("width");
+   return fTotalL[type];
+}
+
+//______________________________________________________________________________
+//
+
