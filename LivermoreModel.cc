@@ -80,18 +80,20 @@ void NEUS::LivermoreModel::LoadData(const char *dir)
    }
 
    // fill spectra
+   Double_t dNL1, dNL2, dNL3;
    for (UShort_t ix=1; ix<=nbinsx; ix++) {
       for (UShort_t iy=1; iy<=nbinsy; iy++) {
          t = fHN2[1]->GetXaxis()->GetBinLowEdge(ix);
          e = fHN2[1]->GetYaxis()->GetBinLowEdge(iy);
+         wilson_nl_(&t, &e, &dNL1, &dNL2, &dNL3);
 
-         fHN2[1]->SetBinContent(ix,iy,N2(1,t,e));
-         fHN2[2]->SetBinContent(ix,iy,N2(2,t,e));
-         fHN2[3]->SetBinContent(ix,iy,N2(3,t,e));
+         fHN2[1]->SetBinContent(ix,iy,dNL1/1e50);
+         fHN2[2]->SetBinContent(ix,iy,dNL2/1e50);
+         fHN2[3]->SetBinContent(ix,iy,dNL3/1e50);
 
-         fHL2[1]->SetBinContent(ix,iy,L2(1,t,e));
-         fHL2[2]->SetBinContent(ix,iy,L2(2,t,e));
-         fHL2[3]->SetBinContent(ix,iy,L2(3,t,e));
+         fHL2[1]->SetBinContent(ix,iy,dNL1*e*1.60217646e-6/1e50);
+         fHL2[2]->SetBinContent(ix,iy,dNL2*e*1.60217646e-6/1e50);
+         fHL2[3]->SetBinContent(ix,iy,dNL3*e*1.60217646e-6/1e50);
       }
    }
 
@@ -182,240 +184,9 @@ void NEUS::LivermoreModel::Clear(Option_t *option)
 //______________________________________________________________________________
 //
 
-Double_t NEUS::LivermoreModel::N2(UShort_t type, Double_t time, Double_t energy)
-{
-   if (type<1 || type>6) {
-      Warning("N2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("N2","Return 0!");
-      return 0;
-   }
-   if (time<fMinT || time>fMaxT) {
-      Warning("N2","Time is out of range!");
-      Warning("N2","Return 0!");
-      return 0;
-   }
-   if (energy<fMinE || energy>fMaxE) {
-      Warning("N2","Energy is out of range!");
-      Warning("N2","Return 0!");
-      return 0;
-   }
-
-   Double_t dNL1, dNL2, dNL3;
-   wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-
-   if (type==1) return dNL1/1e50;
-   else if (type==2) return dNL2/1e50;
-   else return dNL3/1e50;
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::LivermoreModel::L2(UShort_t type, Double_t time, Double_t energy)
-{
-   if (type<1 || type>6) {
-      Warning("L2","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("L2","Return 0!");
-      return 0;
-   }
-   if (time<fMinT || time>fMaxT) {
-      Warning("L2","Time is out of range!");
-      Warning("L2","Return 0!");
-      return 0;
-   }
-   if (energy<fMinE || energy>fMaxE) {
-      Warning("L2","Energy is out of range!");
-      Warning("L2","Return 0!");
-      return 0;
-   }
-
-   Double_t dNL1, dNL2, dNL3;
-   wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-
-   if (type==1) return dNL1/1e50*energy*1.60217646e-6;
-   else if (type==2) return dNL2/1e50*energy*1.60217646e-6;
-   else return dNL3/1e50*energy*1.60217646e-6;
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::LivermoreModel::Ne(UShort_t type, Double_t energy)
-{
-   if (type<1 || type>6) {
-      Warning("Ne","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Ne","Return 0!");
-      return 0;
-   }
-   if (energy<fMinE || energy>fMaxE) {
-      Warning("Ne","Energy is out of range!");
-      Warning("Ne","Return 0!");
-      return 0;
-   }
-
-   Double_t n1=0, n2=0, n3=0;
-   Double_t dNL1, dNL2, dNL3;
-
-   Double_t time = fMinT; // start time [second]
-   Double_t dt = 1.e-3; // time interval [second]
-
-   while (time<=fMaxT) {
-      if (time<0.1) dt = 1e-3;
-      else if (time<0.5) dt = 5e-3;
-      else if (time<1.0) dt = 1e-2;
-      else if (time<4.0) dt = 5e-2;
-      else if (time<10.) dt = 1e-1;
-      else dt = 0.5;
-
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      n1   += dNL1*dt;
-      n2   += dNL2*dt;
-      n3   += dNL3*dt;
-      time += dt;
-   }
-
-   if (type==1) return n1/1e50;
-   else if (type==2) return n2/1e50;
-   else return n3/1e50;
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::LivermoreModel::Nt(UShort_t type, Double_t time)
-{
-   if (time<fMinT || time>fMaxT) {
-      Warning("Nt","Time is out of range!");
-      Warning("Nt","Return 0!");
-      return 0;
-   }
-   if (type<1 || type>6) {
-      Warning("Nt","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Nt","Return 0!");
-      return 0;
-   }
-
-   Double_t n1=0, n2=0, n3=0;
-   Double_t dNL1, dNL2, dNL3;
-
-   Double_t energy = fMinE; // start energy
-   Double_t dE = 2.; // energy inteval
-
-   while (energy<fMaxE) {
-      wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-      n1 += dNL1*dE;
-      n2 += dNL2*dE;
-      n3 += dNL3*dE;
-      energy += dE;
-   }
-
-   if (type==1) return n1/1e50;
-   else if (type==2) return n2/1e50;
-   else return n3/1e50;
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::LivermoreModel::Nall(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("Nall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Nall","Return 0!");
-      return 0;
-   }
-   if (fTotalN[type]!=0) return fTotalN[type];
-
-   Double_t dNL1, dNL2, dNL3;
-
-   Double_t energy = fMinE; // start energy [MeV]
-   Double_t de = 2; // energy step [MeV]
-
-   Double_t time = fMinT; // start time [second]
-   Double_t dt = 1.e-3; // time interval [second]
-
-   while (time<=fMaxT) {
-      if (time<0.1) dt = 1e-3;
-      else if (time<0.5) dt = 5e-3;
-      else if (time<1.0) dt = 1e-2;
-      else if (time<4.0) dt = 5e-2;
-      else if (time<10.) dt = 1e-1;
-      else dt = 0.5;
-
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalN[1] += dNL1*dt*de;
-         fTotalN[2] += dNL2*dt*de;
-         fTotalN[3] += dNL3*dt*de;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   fTotalN[1]/=1e50;
-   fTotalN[2]/=1e50;
-   fTotalN[3]/=1e50;
-
-   if (type==1) return fTotalN[1];
-   else if (type==2) return fTotalN[2];
-   else return fTotalN[3];
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::LivermoreModel::Lall(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("Lall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Lall","Return 0!");
-      return 0;
-   }
-   if (fTotalL[type]!=0) return fTotalL[type];
-
-   Double_t dNL1, dNL2, dNL3;
-
-   Double_t energy = fMinE; // start energy [MeV]
-   Double_t de = 2; // energy step [MeV]
-
-   Double_t time = fMinT; // start time [second]
-   Double_t dt = 1.e-3; // time interval [second]
-
-   while (time<=fMaxT) {
-      if (time<0.1) dt = 1e-3;
-      else if (time<0.5) dt = 5e-3;
-      else if (time<1.0) dt = 1e-2;
-      else if (time<4.0) dt = 5e-2;
-      else if (time<10.) dt = 1e-1;
-      else dt = 0.5;
-
-      energy = fMinE;
-      while (energy<fMaxE) {
-         wilson_nl_(&time, &energy, &dNL1, &dNL2, &dNL3);
-         fTotalL[1] += dNL1*dt*de*energy*1.60217646e-6;
-         fTotalL[2] += dNL2*dt*de*energy*1.60217646e-6;
-         fTotalL[3] += dNL3*dt*de*energy*1.60217646e-6;
-         energy+=de;
-      }
-      time += dt;
-   }
-
-   fTotalL[1]/=1e50;
-   fTotalL[2]/=1e50;
-   fTotalL[3]/=1e50;
-
-   if (type==1) return fTotalL[1];
-   else if (type==2) return fTotalL[2];
-   else return fTotalL[3];
-}
-
-//______________________________________________________________________________
-//
-
 void NEUS::LivermoreModel::Print()
 {
-   Printf("20 Solar mass, Livermore:     N1=%1.2e, N2=%1.2e, Nx=%1.2e, N=%1.2e, L=%1.2e erg",
+   Printf("20 Solar mass, Livermore:     N1=%1.2e, N2=%1.2e, Nx=%1.2e, N=%1.2e, L=%1.2e ergs",
          Nall(1)*1e50, Nall(2)*1e50, Nall(3)*1e50, 
          Nall(1)*1e50 + Nall(2)*1e50 + Nall(3)*1e50*4,
          Lall(1)*1e50 + Lall(2)*1e50 + Lall(3)*1e50*4);
