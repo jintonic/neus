@@ -47,14 +47,6 @@ class NEUS::NakazatoModel : public SupernovaModel
 
       void LoadData(const char *dir);
 
-      Double_t N2(UShort_t type, Double_t time, Double_t energy);
-      Double_t L2(UShort_t type, Double_t time, Double_t energy);
-      Double_t Nt(UShort_t type, Double_t time);
-      Double_t Ne(UShort_t type, Double_t energy);
-      Double_t Nall(UShort_t type);
-      Double_t Lall(UShort_t type);
-      Double_t Eave(UShort_t type);
-
       void Print();
 
       ClassDef(NakazatoModel,1);
