@@ -76,26 +76,26 @@ class NEUS::SupernovaModel : public TNamed
        * time: second after core collapse
        * energy: neutrino energy in unit of MeV/c2
        */
-      virtual Double_t N2(UShort_t type, Double_t time, Double_t energy) = 0;
-      virtual Double_t L2(UShort_t type, Double_t time, Double_t energy) = 0;
+      Double_t N2(UShort_t type, Double_t time, Double_t energy);
+      Double_t L2(UShort_t type, Double_t time, Double_t energy);
       /**
        * Number of neutrinos integrated over energy, N(t).
        * It is in unit of 1e50/second.
        */
-      virtual Double_t Nt(UShort_t type, Double_t time) = 0;
+      Double_t Nt(UShort_t type, Double_t time);
       /**
        * Number of neutrinos integrated over time, N(E).
        * It is in unit of 1e50/MeV.
        */
-      virtual Double_t Ne(UShort_t type, Double_t energy) = 0;
+      Double_t Ne(UShort_t type, Double_t energy);
       /**
        * Fermi-Dirac approximation of N(E)
        * It is in unit of 1e50/MeV/second.
        */
       Double_t NeFD(UShort_t type, Double_t energy);
 
-      virtual Double_t Nall(UShort_t type) = 0;
-      virtual Double_t Lall(UShort_t type) = 0;
+      virtual Double_t Nall(UShort_t type);
+      virtual Double_t Lall(UShort_t type);
       Double_t Eave(UShort_t type);
 
       /**
