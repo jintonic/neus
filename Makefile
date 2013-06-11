@@ -99,7 +99,7 @@ RLIBMAP = rlibmap
 # the first target is the default target, it depends on $(ROOTMAP)
 # before "make all", make will include all other makefiles specified
 # by the include command
-all: $(ROOTMAP) $(EXES)
+all: $(EXES)
 	@echo
 	@echo "* Done!"
 	@echo 
@@ -125,8 +125,6 @@ $(ROOTMAP): $(LIBRARY)
 	@echo
 	@echo "* Creating rootmap file:"
 	$(RLIBMAP) -o $(ROOTMAP) -l $(LIBRARY) -d $(DEPENDS) -c $(LINKDEF)
-	@echo
-	@echo "* Creating executables:"
 
 # lib$(LIBNAME).so depends on all *.o files.
 #  The flag "-shared" is used to create shared libs
@@ -169,8 +167,9 @@ clean:
 tags:
 	ctags --c-kinds=+p $(HEADERS) $(SOURCES)
 
-install:
-	@echo "PREFIX=$(PREFIX)"
+install: $(ROOTMAP)
+	@echo
+	@echo "* Installing library to PREFIX=$(PREFIX)"
 	@echo -n "checking if $(PREFIX) exists..."
 	@if [ -d $(PREFIX) ]; then \
 	  echo "yes."; \
@@ -203,13 +202,15 @@ install:
 	  cp *.h $(PREFIX)/include/$(LIBNAME); \
 	fi
 	@echo "done."
+	@echo
+	@echo "* Creating executables:"
 
 uninstall:
 	$(RM) -r $(PREFIX)/include/$(LIBNAME)
 	$(RM) -r $(PREFIX)/lib/lib$(LIBNAME).so
 
 
-$(EXES):%.exe:%.C
+$(EXES):%.exe:%.C install
 	$(CXX) $< $(CXXFLAGS) -L. -l$(LIBNAME) -L$(TOTAL)/lib -lTOTAL $(LIBS) -o $@
 
 .PHONY: all info tags clean install uninstall
