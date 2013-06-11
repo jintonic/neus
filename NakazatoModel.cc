@@ -87,10 +87,10 @@ void NEUS::NakazatoModel::LoadIntegratedData()
 
    // fill spectra
    for (UShort_t i=1; i<=3; i++) {
-      fHNe[i] = new TH1D(Form("hNe%s%d%f", GetName(), i, fMaxT),
+      fHNe[i] = new TH1D(Form("hNe-%s-%d-%.4f", GetName(), i, fMaxT),
             ";energy [MeV];number of neutrinos [10^{50}/MeV]",fNbinsE,binEdges);
 
-      fHLe[i] = new TH1D(Form("hLe%s%d%f", GetName(), i,fMaxT),
+      fHLe[i] = new TH1D(Form("hLe-%s-%d-%.4f", GetName(), i, fMaxT),
             ";energy [MeV];luminosity [10^{50} erg/MeV]",fNbinsE,binEdges);
    }
    for (UShort_t i=4; i<=6; i++) {
@@ -310,84 +310,9 @@ void NEUS::NakazatoModel::LoadFullData()
 //______________________________________________________________________________
 //
 
-Double_t NEUS::NakazatoModel::N2(UShort_t type, Double_t time, Double_t energy)
-{
-   return HN2(type)->Interpolate(time, energy);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::L2(UShort_t type, Double_t time, Double_t energy)
-{
-   return HL2(type)->Interpolate(time, energy);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::Ne(UShort_t type, Double_t energy)
-{
-   return HNe(type)->Interpolate(energy);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::Nt(UShort_t type, Double_t time)
-{
-   return HNt(type)->Interpolate(time);
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::Nall(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("Nall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Nall","Return 0!");
-      return 0;
-   }
-   if (fTotalN[type]==0) fTotalN[type] = HNe(type)->Integral("width");
-   return fTotalN[type];
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::Lall(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("Lall","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Lall","Return 0!");
-      return 0;
-   }
-   if (fTotalL[type]==0) fTotalL[type] = HLe(type)->Integral("width");
-   return fTotalL[type];
-}
-
-//______________________________________________________________________________
-//
-
-Double_t NEUS::NakazatoModel::Eave(UShort_t type)
-{
-   if (type<1 || type>6) {
-      Warning("Eave","Type of neutrino must be one of 1, 2, 3, 4, 5, 6!");
-      Warning("Eave","Return 0!");
-      return 0;
-   }
-   if (abs(fAverageE[type]-1.0)<0.01)
-      fAverageE[type] = Lall(type)/Nall(type)/1.60217646e-6;
-   return fAverageE[type];
-}
-
-//______________________________________________________________________________
-//
-
 void NEUS::NakazatoModel::Print()
 {
-   Printf("%2.0f Solar mass, %.3f, %3.0f ms: N1=%1.2e, N2=%1.2e, Nx=%1.2e, N=%1.2e, L=%1.2e erg",
+   Printf("%2.0f Solar mass, %.3f, %3.0f ms: N1=%1.2e, N2=%1.2e, Nx=%1.2e, N=%1.2e, L=%1.2e ergs",
          fInitialMass, fMetallicity, fReviveTime,
          Nall(1)*1e50, Nall(2)*1e50, Nall(3)*1e50, 
          Nall(1)*1e50 + Nall(2)*1e50 + Nall(3)*1e50*4,
