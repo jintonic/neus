@@ -64,7 +64,7 @@ class NEUS::SupernovaModel : public TNamed
 
       Double_t TMax() { return fMaxT; }
       Double_t TMin() { return fMinT; }
-      Double_t EMax() { return fMaxT; }
+      Double_t EMax() { return fMaxE; }
       Double_t EMin() { return fMinE; }
 
       /**
@@ -112,7 +112,7 @@ class NEUS::SupernovaModel : public TNamed
        * x axis: second after the core collapse, in [TMin(), TMax()].
        * y axis: number of neutrinos in unit of 1e50/second.
        */
-      TH1D* HNt(UShort_t type=1, Double_t emax=99);
+      TH1D* HNt(UShort_t type=1, Double_t emax=999.);
       /**
        * N(E) in TH1D format.
        * It is the integration of N(t, E) over [TMin(), tmax].
@@ -120,7 +120,7 @@ class NEUS::SupernovaModel : public TNamed
        * x axis: neutrino energy, in [EMin(), EMax()].
        * y axis: number of neutrinos in unit of 1e50/MeV.
        */
-      TH1D* HNe(UShort_t type=1, Double_t tmax=99);
+      TH1D* HNe(UShort_t type=1, Double_t tmax=999.);
 
       TF1* FNeFD(UShort_t type=1); // Fermi-Dirac approximation of N(E)
       TH1D* HNeFD(UShort_t type=1); // Fermi-Dirac approximation of N(E)
@@ -132,8 +132,8 @@ class NEUS::SupernovaModel : public TNamed
        * z axis: luminosity of neutrinos in unit of 1e50*erg/MeV/second.
        */
       TH2D* HL2(UShort_t type=1);
-      TH1D* HLt(UShort_t type=1, Double_t emax=99); // L(t)
-      TH1D* HLe(UShort_t type=1, Double_t tmax=99); // L(E)
+      TH1D* HLt(UShort_t type=1, Double_t emax=999.); // L(t)
+      TH1D* HLe(UShort_t type=1, Double_t tmax=999.); // L(E)
 
       /**
        * Average energy of neutrinos, <E>(t) in TH1D format.
@@ -142,7 +142,7 @@ class NEUS::SupernovaModel : public TNamed
        * x axis: second after the core collapse, in [TMin(), TMax()].
        * y axis: average energy in unit of MeV/second.
        */
-      TH1D* HEt(UShort_t type=1, Double_t emax=99);
+      TH1D* HEt(UShort_t type=1, Double_t emax=999.);
 
       ClassDef(SupernovaModel,1);
 };
