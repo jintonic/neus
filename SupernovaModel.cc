@@ -193,27 +193,28 @@ TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
    }
    if (tmax>fMaxT) tmax=fMaxT;
 
-   TString name = Form("hNe%s%d%f", GetName(), type, tmax);
+   TString name = Form("hNe%s-%d-%.4f", GetName(), type, tmax);
    if (fHNe[type]) {
       if (name.CompareTo(fHNe[type]->GetName())==0) return fHNe[type];
       else fHNe[type]->Reset();
    } else {
+      Info("HNe", "Create %s",name.Data());
       fHNe[type] = new TH1D(name.Data(),
             ";energy [MeV];number of neutrinos [10^{50}/MeV]",
-            fHN2[type]->GetNbinsY(),
-            fHN2[type]->GetYaxis()->GetXbins()->GetArray());
+            HN2(type)->GetNbinsY(),
+            HN2(type)->GetYaxis()->GetXbins()->GetArray());
       fHNe[type]->SetStats(0);
-      fHNe[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHNe[type]->SetLineColor(HN2(type)->GetLineColor());
       fHNe[type]->SetTitle(GetTitle());
    }
 
    // calculate integral in [0, tmax]
-   for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
+   for (UShort_t iy=1; iy<=HN2(type)->GetNbinsY(); iy++) {
       Double_t content=0;
-      for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
-         if (tmax<fHN2[type]->GetXaxis()->GetBinCenter(ix)) break;
-         content += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetXaxis()->GetBinWidth(ix);
+      for (UShort_t ix=1; ix<=HN2(type)->GetNbinsX(); ix++) {
+         if (tmax<HN2(type)->GetXaxis()->GetBinCenter(ix)) break;
+         content += HN2(type)->GetBinContent(ix,iy) *
+            HN2(type)->GetXaxis()->GetBinWidth(ix);
       }
       fHNe[type]->SetBinContent(iy,content);
    }
@@ -232,27 +233,28 @@ TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
    }
    if (tmax>fMaxT) tmax=fMaxT;
 
-   TString name = Form("hLe%s%d%f", GetName(), type, tmax);
+   TString name = Form("hLe%s-%d-%.4f", GetName(), type, tmax);
    if (fHLe[type]) {
       if (name.CompareTo(fHLe[type]->GetName())==0) return fHLe[type];
       else fHLe[type]->Reset();
    } else {
+      Info("HLe", "Create %s",name.Data());
       fHLe[type] = new TH1D(name.Data(),
             ";energy [MeV];luminosity [10^{50} erg/MeV]",
-            fHN2[type]->GetNbinsY(),
-            fHN2[type]->GetYaxis()->GetXbins()->GetArray());
+            HN2(type)->GetNbinsY(),
+            HN2(type)->GetYaxis()->GetXbins()->GetArray());
       fHLe[type]->SetStats(0);
-      fHLe[type]->SetLineColor(fHL2[type]->GetLineColor());
+      fHLe[type]->SetLineColor(HL2(type)->GetLineColor());
       fHLe[type]->SetTitle(GetTitle());
    }
 
    // calculate integral in [0, tmax]
-   for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
+   for (UShort_t iy=1; iy<=HL2(type)->GetNbinsY(); iy++) {
       Double_t content=0;
-      for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
-         if (tmax<fHL2[type]->GetXaxis()->GetBinCenter(ix)) break;
-         content += fHL2[type]->GetBinContent(ix,iy) *
-            fHL2[type]->GetXaxis()->GetBinWidth(ix);
+      for (UShort_t ix=1; ix<=HL2(type)->GetNbinsX(); ix++) {
+         if (tmax<HL2(type)->GetXaxis()->GetBinCenter(ix)) break;
+         content += HL2(type)->GetBinContent(ix,iy) *
+            HL2(type)->GetXaxis()->GetBinWidth(ix);
       }
       fHLe[type]->SetBinContent(iy,content);
    }
@@ -271,27 +273,28 @@ TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hNt%s%d%f", GetName(), type, emax);
+   TString name = Form("hNt%s-%d-%.1f", GetName(), type, emax);
    if (fHNt[type]) {
      if (name.CompareTo(fHNt[type]->GetName())==0) return fHNt[type];
      else fHNt[type]->Reset();
    } else {
+      Info("HNt", "Create %s",name.Data());
       fHNt[type] = new TH1D(name.Data(),
             ";time [second];number of neutrinos [10^{50}/second]",
-            fHN2[type]->GetNbinsX(),
-            fHN2[type]->GetXaxis()->GetXbins()->GetArray());
+            HN2(type)->GetNbinsX(),
+            HN2(type)->GetXaxis()->GetXbins()->GetArray());
       fHNt[type]->SetStats(0);
-      fHNt[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHNt[type]->SetLineColor(HN2(type)->GetLineColor());
       fHNt[type]->SetTitle(GetTitle());
    }
 
    // calculate integral
-   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
+   for (UShort_t ix=1; ix<=HN2(type)->GetNbinsX(); ix++) {
       Double_t content=0;
-      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
-         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         content += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetYaxis()->GetBinWidth(iy);
+      for (UShort_t iy=1; iy<=HN2(type)->GetNbinsY(); iy++) {
+         if (emax<HN2(type)->GetYaxis()->GetBinLowEdge(iy)) break;
+         content += HN2(type)->GetBinContent(ix,iy) *
+            HN2(type)->GetYaxis()->GetBinWidth(iy);
       }
       fHNt[type]->SetBinContent(ix,content);
    }
@@ -310,28 +313,28 @@ TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hLt%s%d%f", GetName(), type, emax);
+   TString name = Form("hLt%s-%d-%.1f", GetName(), type, emax);
    if (fHLt[type]) {
       if (name.CompareTo(fHLt[type]->GetName())==0) return fHLt[type];
       else fHLt[type]->Reset();
    } else {
-      Info("HEt", "Create HEt.");
+      Info("HLt", "Create %s",name.Data());
       fHLt[type] = new TH1D(name.Data(),
             ";time [second];luminosity [10^{50} erg/second]",
-            fHL2[type]->GetNbinsX(),
-            fHL2[type]->GetXaxis()->GetXbins()->GetArray());
+            HL2(type)->GetNbinsX(),
+            HL2(type)->GetXaxis()->GetXbins()->GetArray());
       fHLt[type]->SetStats(0);
-      fHLt[type]->SetLineColor(fHL2[type]->GetLineColor());
+      fHLt[type]->SetLineColor(HL2(type)->GetLineColor());
       fHLt[type]->SetTitle(GetTitle());
    }
 
    // calculate integral
-   for (UShort_t ix=1; ix<=fHL2[type]->GetNbinsX(); ix++) {
+   for (UShort_t ix=1; ix<=HL2(type)->GetNbinsX(); ix++) {
       Double_t content=0;
-      for (UShort_t iy=1; iy<=fHL2[type]->GetNbinsY(); iy++) {
-         if (emax<fHL2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         content += fHL2[type]->GetBinContent(ix,iy) *
-            fHL2[type]->GetYaxis()->GetBinWidth(iy);
+      for (UShort_t iy=1; iy<=HL2(type)->GetNbinsY(); iy++) {
+         if (emax<HL2(type)->GetYaxis()->GetBinLowEdge(iy)) break;
+         content += HL2(type)->GetBinContent(ix,iy) *
+            HL2(type)->GetYaxis()->GetBinWidth(iy);
       }
       fHLt[type]->SetBinContent(ix,content);
    }
@@ -350,31 +353,31 @@ TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
    }
    if (emax>fMaxE) emax=fMaxE;
 
-   TString name = Form("hEt%s%d%f", GetName(), type, emax);
+   TString name = Form("hEt%s-%d-%.1f", GetName(), type, emax);
    if (fHEt[type]) {
       if (name.CompareTo(fHEt[type]->GetName())==0) return fHEt[type];
       else fHEt[type]->Reset();
    } else {
-      Info("HEt", "Create HEt.");
+      Info("HEt", "Create %s",name.Data());
       fHEt[type] = new TH1D(name.Data(),
             ";time [second];average energy [MeV/second]",
-            fHN2[type]->GetNbinsX(),
-            fHN2[type]->GetXaxis()->GetXbins()->GetArray());
+            HN2(type)->GetNbinsX(),
+            HN2(type)->GetXaxis()->GetXbins()->GetArray());
       fHEt[type]->SetStats(0);
-      fHEt[type]->SetLineColor(fHN2[type]->GetLineColor());
+      fHEt[type]->SetLineColor(HN2(type)->GetLineColor());
       fHEt[type]->SetTitle(GetTitle());
    }
 
    // calculate average
-   for (UShort_t ix=1; ix<=fHN2[type]->GetNbinsX(); ix++) {
+   for (UShort_t ix=1; ix<=HN2(type)->GetNbinsX(); ix++) {
       Double_t totalE=0, totalN=0;
-      for (UShort_t iy=1; iy<=fHN2[type]->GetNbinsY(); iy++) {
-         if (emax<fHN2[type]->GetYaxis()->GetBinLowEdge(iy)) break;
-         totalN += fHN2[type]->GetBinContent(ix,iy) *
-            fHN2[type]->GetYaxis()->GetBinWidth(iy);
-         totalE += fHN2[type]->GetBinContent(ix,iy) * 
-            fHN2[type]->GetYaxis()->GetBinWidth(iy) *
-            fHN2[type]->GetYaxis()->GetBinCenter(iy);
+      for (UShort_t iy=1; iy<=HN2(type)->GetNbinsY(); iy++) {
+         if (emax<HN2(type)->GetYaxis()->GetBinLowEdge(iy)) break;
+         totalN += HN2(type)->GetBinContent(ix,iy) *
+            HN2(type)->GetYaxis()->GetBinWidth(iy);
+         totalE += HN2(type)->GetBinContent(ix,iy) * 
+            HN2(type)->GetYaxis()->GetBinWidth(iy) *
+            HN2(type)->GetYaxis()->GetBinCenter(iy);
       }
       fHEt[type]->SetBinContent(ix,totalE/totalN);
    }
