@@ -413,6 +413,8 @@ Double_t NEUS::SupernovaModel::L2(UShort_t type, Double_t time, Double_t energy)
 
 Double_t NEUS::SupernovaModel::Ne(UShort_t type, Double_t energy)
 {
+   if (GetName()[0]=='D')
+      return HNeFD(type)->Interpolate(energy);
    return HNe(type)->Interpolate(energy);
 }
 
