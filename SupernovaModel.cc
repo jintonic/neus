@@ -196,16 +196,16 @@ TH1D* NEUS::SupernovaModel::HNe(UShort_t type, Double_t tmax)
    TString name = Form("hNe-%s-%d-%.4f", GetName(), type, tmax);
    if (fHNe[type]) {
       if (name.CompareTo(fHNe[type]->GetName())==0) return fHNe[type];
-      else fHNe[type]->Reset();
-   } else {
-      fHNe[type] = new TH1D(name.Data(),
-            ";energy [MeV];number of neutrinos [10^{50}/MeV]",
-            HN2(type)->GetNbinsY(),
-            HN2(type)->GetYaxis()->GetXbins()->GetArray());
-      fHNe[type]->SetStats(0);
-      fHNe[type]->SetLineColor(HN2(type)->GetLineColor());
-      fHNe[type]->SetTitle(GetTitle());
+      else delete fHNe[type];
    }
+
+   fHNe[type] = new TH1D(name.Data(),
+         ";energy [MeV];number of neutrinos [10^{50}/MeV]",
+         HN2(type)->GetNbinsY(),
+         HN2(type)->GetYaxis()->GetXbins()->GetArray());
+   fHNe[type]->SetStats(0);
+   fHNe[type]->SetLineColor(HN2(type)->GetLineColor());
+   fHNe[type]->SetTitle(GetTitle());
 
    // calculate integral in [0, tmax]
    for (UShort_t iy=1; iy<=HN2(type)->GetNbinsY(); iy++) {
@@ -235,16 +235,16 @@ TH1D* NEUS::SupernovaModel::HLe(UShort_t type, Double_t tmax)
    TString name = Form("hLe-%s-%d-%.4f", GetName(), type, tmax);
    if (fHLe[type]) {
       if (name.CompareTo(fHLe[type]->GetName())==0) return fHLe[type];
-      else fHLe[type]->Reset();
-   } else {
-      fHLe[type] = new TH1D(name.Data(),
-            ";energy [MeV];luminosity [10^{50} erg/MeV]",
-            HL2(type)->GetNbinsY(),
-            HL2(type)->GetYaxis()->GetXbins()->GetArray());
-      fHLe[type]->SetStats(0);
-      fHLe[type]->SetLineColor(HL2(type)->GetLineColor());
-      fHLe[type]->SetTitle(GetTitle());
+      else delete fHLe[type];
    }
+
+   fHLe[type] = new TH1D(name.Data(),
+         ";energy [MeV];luminosity [10^{50} erg/MeV]",
+         HL2(type)->GetNbinsY(),
+         HL2(type)->GetYaxis()->GetXbins()->GetArray());
+   fHLe[type]->SetStats(0);
+   fHLe[type]->SetLineColor(HL2(type)->GetLineColor());
+   fHLe[type]->SetTitle(GetTitle());
 
    // calculate integral in [0, tmax]
    for (UShort_t iy=1; iy<=HL2(type)->GetNbinsY(); iy++) {
@@ -273,18 +273,18 @@ TH1D* NEUS::SupernovaModel::HNt(UShort_t type, Double_t emax)
 
    TString name = Form("hNt-%s-%d-%.1f", GetName(), type, emax);
    if (fHNt[type]) {
-     if (name.CompareTo(fHNt[type]->GetName())==0) return fHNt[type];
-     else fHNt[type]->Reset();
-   } else {
-      Info("HNt", "Create %s",name.Data());
-      fHNt[type] = new TH1D(name.Data(),
-            ";time [second];number of neutrinos [10^{50}/second]",
-            HN2(type)->GetNbinsX(),
-            HN2(type)->GetXaxis()->GetXbins()->GetArray());
-      fHNt[type]->SetStats(0);
-      fHNt[type]->SetLineColor(HN2(type)->GetLineColor());
-      fHNt[type]->SetTitle(GetTitle());
+      if (name.CompareTo(fHNt[type]->GetName())==0) return fHNt[type];
+      else delete fHNt[type];
    }
+
+   Info("HNt", "Create %s",name.Data());
+   fHNt[type] = new TH1D(name.Data(),
+         ";time [second];number of neutrinos [10^{50}/second]",
+         HN2(type)->GetNbinsX(),
+         HN2(type)->GetXaxis()->GetXbins()->GetArray());
+   fHNt[type]->SetStats(0);
+   fHNt[type]->SetLineColor(HN2(type)->GetLineColor());
+   fHNt[type]->SetTitle(GetTitle());
 
    // calculate integral
    for (UShort_t ix=1; ix<=HN2(type)->GetNbinsX(); ix++) {
@@ -314,17 +314,17 @@ TH1D* NEUS::SupernovaModel::HLt(UShort_t type, Double_t emax)
    TString name = Form("hLt-%s-%d-%.1f", GetName(), type, emax);
    if (fHLt[type]) {
       if (name.CompareTo(fHLt[type]->GetName())==0) return fHLt[type];
-      else fHLt[type]->Reset();
-   } else {
-      Info("HLt", "Create %s",name.Data());
-      fHLt[type] = new TH1D(name.Data(),
-            ";time [second];luminosity [10^{50} erg/second]",
-            HL2(type)->GetNbinsX(),
-            HL2(type)->GetXaxis()->GetXbins()->GetArray());
-      fHLt[type]->SetStats(0);
-      fHLt[type]->SetLineColor(HL2(type)->GetLineColor());
-      fHLt[type]->SetTitle(GetTitle());
-   }
+      else delete fHLt[type];
+   } 
+
+   Info("HLt", "Create %s",name.Data());
+   fHLt[type] = new TH1D(name.Data(),
+         ";time [second];luminosity [10^{50} erg/second]",
+         HL2(type)->GetNbinsX(),
+         HL2(type)->GetXaxis()->GetXbins()->GetArray());
+   fHLt[type]->SetStats(0);
+   fHLt[type]->SetLineColor(HL2(type)->GetLineColor());
+   fHLt[type]->SetTitle(GetTitle());
 
    // calculate integral
    for (UShort_t ix=1; ix<=HL2(type)->GetNbinsX(); ix++) {
@@ -354,17 +354,17 @@ TH1D* NEUS::SupernovaModel::HEt(UShort_t type, Double_t emax)
    TString name = Form("hEt-%s-%d-%.1f", GetName(), type, emax);
    if (fHEt[type]) {
       if (name.CompareTo(fHEt[type]->GetName())==0) return fHEt[type];
-      else fHEt[type]->Reset();
-   } else {
-      Info("HEt", "Create %s",name.Data());
-      fHEt[type] = new TH1D(name.Data(),
-            ";time [second];average energy [MeV/second]",
-            HN2(type)->GetNbinsX(),
-            HN2(type)->GetXaxis()->GetXbins()->GetArray());
-      fHEt[type]->SetStats(0);
-      fHEt[type]->SetLineColor(HN2(type)->GetLineColor());
-      fHEt[type]->SetTitle(GetTitle());
+      else delete fHEt[type];
    }
+
+   Info("HEt", "Create %s",name.Data());
+   fHEt[type] = new TH1D(name.Data(),
+         ";time [second];average energy [MeV/second]",
+         HN2(type)->GetNbinsX(),
+         HN2(type)->GetXaxis()->GetXbins()->GetArray());
+   fHEt[type]->SetStats(0);
+   fHEt[type]->SetLineColor(HN2(type)->GetLineColor());
+   fHEt[type]->SetTitle(GetTitle());
 
    // calculate average
    for (UShort_t ix=1; ix<=HN2(type)->GetNbinsX(); ix++) {
