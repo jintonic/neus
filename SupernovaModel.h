@@ -15,12 +15,7 @@ namespace NEUS { class SupernovaModel; }
  */
 class NEUS::SupernovaModel : public TNamed
 {
-   protected:
-      TString fDataLocation;
-
-      Double_t fMinE, fMaxE;
-      Double_t fMinT, fMaxT;
-
+   public:
       /**
        * Numbers of types of neutrinos.
        * There are 6 types of neutrinos:
@@ -33,6 +28,13 @@ class NEUS::SupernovaModel : public TNamed
        * type 0: reserved for special uses
        */
       static const UShort_t fgNtype = 7;
+
+   protected:
+      TString fDataLocation;
+
+      Double_t fMinE, fMaxE;
+      Double_t fMinT, fMaxT;
+
       Double_t fTotalN[fgNtype], fTotalL[fgNtype];
       Double_t fAverageE[fgNtype];
 
