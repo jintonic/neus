@@ -19,10 +19,12 @@ NEUS::NakazatoModel::NakazatoModel(
 
    if (metallicity>0.02-0.01) {
       fName = Form("model%.0f0%.0f",fInitialMass,fReviveTime/100);
-      fTitle = Form("%.0f Solar mass, 0.02, %.0f ms",fInitialMass,fReviveTime);
+      fTitle = Form("%.0f Solar mass, metallicity: 0.02, revive time: %.0f ms",
+            fInitialMass,fReviveTime);
    } else {
       fName = Form("model%.0f1%.0f",fInitialMass,fReviveTime/100);
-      fTitle = Form("%.0f Solar mass, 0.004, %.0f ms",fInitialMass,fReviveTime);
+      fTitle = Form("%.0f Solar mass, metallicity: 0.004, revive time: %.0f ms",
+            fInitialMass,fReviveTime);
    }
 }
 
