@@ -68,6 +68,8 @@ class NEUS::SupernovaModel : public TNamed
       Double_t TMin() { return fMinT; }
       Double_t EMax() { return fMaxE; }
       Double_t EMin() { return fMinE; }
+      void SetEMin(double E) { fMinE=E; }
+      void SetEMax(double E) { fMaxE=E; }
 
       /**
        * Number of neutrinos as a function of time and energy, N(t, E).
