@@ -45,18 +45,20 @@ int main()
    hNe1->GetYaxis()->SetRangeUser(1e3,1e7);
    hNe1->GetYaxis()->SetTitle("total number of neutrino [10^{50}/MeV]");
    hNe1->GetXaxis()->SetTitle("neutrino energy [MeV]");
-   hNe1->SetLineWidth(2);
+   hNe1->SetLineWidth(6);
    hNe1->SetLineStyle(kDashed);
    hNe1->Draw();
-   hNe2->SetLineWidth(2);
+   hNe2->SetLineWidth(4);
    hNe2->SetLineStyle(kDashed);
    hNe2->Draw("same");
    hNex->SetLineWidth(2);
    hNex->SetLineStyle(kDashed);
    hNex->Draw("same");
-   hNv1->Draw("same");
-   hNv2->Draw("same");
+   hNvx->SetLineWidth(4);
    hNvx->Draw("same");
+   hNv2->SetLineWidth(2);
+   hNv2->Draw("same");
+   hNv1->Draw("same");
 
    TLegend *l = new TLegend(0.75,0.5,0.98,0.96);
    l->SetBorderSize(0);
