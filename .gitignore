@@ -4,6 +4,7 @@
 *.so
 *Dict*
 *.rootmap
+*.pcm
 
 *.ps
 *.gz
